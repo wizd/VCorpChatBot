@@ -7,6 +7,10 @@ import {
 } from "wechaty/impls";
 import { asyncSleep } from "./utils";
 import { sendMessage, resetMessage, messageManager } from "./gptTurboApi";
+import { addUser, getUserByWeixinId } from "./db/users";
+import { UserProfile } from "./db/users";
+
+let myuserid = "";
 
 function onScan(qrcode: string, status: number) {
   require("qrcode-terminal").generate(qrcode, { small: true }); // 在console端显示二维码
@@ -18,6 +22,8 @@ function onScan(qrcode: string, status: number) {
 }
 async function onLogin(user: ContactSelfInterface) {
   console.log(`User ${user} logged in`);
+  console.log("my user id is: ", user.id);
+  myuserid = user.id;
 }
 function onLogout(user: ContactSelfInterface) {
   console.log(`${user} 已经登出`);
@@ -27,7 +33,7 @@ async function onFriendship(
   bot: WechatyInterface
 ) {
   try {
-    console.log(`received friend event.`);
+    console.log(`received friend event:`, friendship);
     switch (friendship.type()) {
       case bot.Friendship.Type.Receive:
         await friendship.accept();
@@ -45,10 +51,34 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   const contact = message.talker();
   const room = message.room();
   let text = message.text();
+
+  //console.log("contact is: ", contact);
+  //console.log("contact ID is: ", contact.id);
+  //console.log("room is: ", room);
+  console.log("message is: ", message);
+
   if (room) {
     try {
       const topic = await room.topic()
       const selfName = bot.currentUser.name()
+
+      // check if talk to me
+      //const talkTos = await message.mentionList()
+      //console.log("talkTos is: ", talkTos);
+      //if(talkTos.includes(bot.currentUser.id)) return;
+
+      // get talkerid
+      const talkerid = message.talker().id;
+      console.log("talkerid is: ", talkerid);
+      const vcuser = await getUserByWeixinId(talkerid);
+      if(!vcuser) {
+        console.log("a new user");
+        const newvcuser : UserProfile = {
+          weixinId: talkerid,
+        };
+        await addUser(newvcuser);
+      }
+
       console.log(`room topic is : ${topic}, ${text}`)
       if (text.indexOf(`@${selfName}`) !== -1) {
         text = text.split(`@${selfName}`)[1].trim()

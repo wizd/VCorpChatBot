@@ -1,5 +1,3 @@
-const dotnev = require("dotenv");
-dotnev.config();
 import { fetchApi } from "./utils";
 
 const chatGPTUrl = "http://192.168.3.59:4004/v1/chat/completions";
@@ -34,9 +32,12 @@ export const messageManager = (() => {
   let usageList: Record<string, any[]> = {};
   return {
     addUsage: (usage: any, user: string) => {
+      // {prompt_tokens: 10, completion_tokens: 17, total_tokens: 27}
       if (!usageList[user]) {
         usageList[user] = []
       }
+      console.log("add usage for user: ", user);
+      console.log("add usage: ", usage);
       usageList[user].push(usage);
     },
     getUsage: (user: string) => {
