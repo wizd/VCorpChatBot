@@ -99,3 +99,21 @@ export async function getTotalUsage(userId: ObjectId): Promise<number> {
       
         return result;
   }
+
+  export async function getUsageCountForLast24Hours(userId: ObjectId): Promise<number> {
+    const result = await withDb(async (db) => {
+      const collection = db.collection<UsageDocument>(collName);
+  
+      const currentTime = new Date();
+      const twentyFourHoursAgo = new Date(currentTime.getTime() - 24 * 60 * 60 * 1000);
+  
+      const count = await collection.countDocuments({
+        userId: userId,
+        time: { $gte: twentyFourHoursAgo },
+      });
+  
+      return count;
+    });
+  
+    return result;
+  }

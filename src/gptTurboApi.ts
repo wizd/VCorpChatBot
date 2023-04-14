@@ -3,23 +3,13 @@ import { fetchApi } from "./utils";
 import { addUsage, getTokensSumByUserId, getTokensSumByWeixinRoomId, getTotalUsage } from "./db/usage";
 import { addVChatMessage, deleteAllMessagesByUserId, getLatestMessages } from "./db/vchatmessage";
 
-const chatGPTUrl = "http://192.168.3.59:4004/v1/chat/completions";
-
 const chatWithGPT = async (messages: any[]) => {
   const headers: Record<string, any> = {
-    Authorization: `Bearer thei5CeseiKosh3huR4nuKeLOhg6ohv1Hol2owuL`,// ${process.env.OPEN_AI_KEY}`,
+    Authorization: `Bearer ${process.env.OPEN_AI_KEY}`,
   };
-  const apiUrl = chatGPTUrl
-  //let { CHATY_PROXY } = process.env
-  // if (CHATY_PROXY) {
-  //   if (CHATY_PROXY[CHATY_PROXY.length - 1] !== '/') {
-  //     CHATY_PROXY += '/'
-  //   }
-  //   headers.origin = 'https://app.uniswap.org'
-  //   apiUrl = CHATY_PROXY + chatGPTUrl
-  // }
+
   const answer = await fetchApi(
-    apiUrl,
+    process.env.OPEN_AI_URL || 'https://api.openai.com/v1/chat/completions',
     "POST",
     { headers, timeout: 60000 },
     {
