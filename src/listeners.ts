@@ -9,6 +9,7 @@ import { asyncSleep } from "./utils";
 import { sendMessage, resetMessage, messageManager } from "./gptTurboApi";
 import { addUser, getOrCreateUserByWeixinId, getUserByWeixinId } from "./db/users";
 import { UserProfile } from "./db/users";
+import { calculateMembershipExpiration, parseWechatTransfer, timeRemainingReadable } from "./msgparser";
 
 function onScan(qrcode: string, status: number) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -50,7 +51,7 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   const room = message.room();
   let text = message.text();
 
-  //console.log("contact is: ", contact);
+  console.log("contact is: ", contact);
   //console.log("contact ID is: ", contact.id);
   console.log("room is: ", room);
   console.log("message is: ", message);
@@ -61,6 +62,25 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   const vcuser = await getOrCreateUserByWeixinId(talkerid);
   if(vcuser === null || vcuser._id === undefined) {
     console.log("Fatal error!!!!! vcuser is null for talkerid: ", talkerid);
+    return;
+  }
+
+  // process special messages
+  // transfer message, type === 11
+  if(message.type() === 11) {
+    const txtext = message.text();
+    const txinfo = parseWechatTransfer(txtext);
+    if(txinfo !== null)      {
+        const exp = calculateMembershipExpiration(txinfo.amount);
+        const expstr = timeRemainingReadable(exp);
+        await message.say(`@${contact.payload?.name}\n收到转账${txinfo.amount}元，谢谢！${txinfo.memo} 的优惠价是380, 您的会员有效期至${exp}，一共 ${expstr}`);
+    }
+
+    return;
+  }
+
+  if(message.type() !== bot.Message.Type.Text) {
+    console.log("message type is not text, ignore it: ", message.type());
     return;
   }
 
@@ -82,7 +102,7 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
         if (/^(usage|额度|用量)/gim.test(text)) {
           const humanUsage = await messageManager.getUsagePrint(vcuser._id, room.id);
           console.log(humanUsage)
-          await message.say(humanUsage!);
+          await message.say(`@${contact.payload?.name}\n${humanUsage}`);
           return
         }
         let reply = await sendMessage(text, vcuser._id, room.id);
