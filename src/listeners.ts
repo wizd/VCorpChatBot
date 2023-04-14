@@ -11,6 +11,7 @@ import { addUser, getOrCreateUserByWeixinId, getUserByWeixinId } from "./db/user
 import { UserProfile } from "./db/users";
 
 function onScan(qrcode: string, status: number) {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require("qrcode-terminal").generate(qrcode, { small: true }); // 在console端显示二维码
   const qrcodeImageUrl = [
     "https://wechaty.js.org/qrcode/",
@@ -58,6 +59,10 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   const talkerid = message.talker().id;
   console.log("talkerid is: ", talkerid);
   const vcuser = await getOrCreateUserByWeixinId(talkerid);
+  if(vcuser === null || vcuser._id === undefined) {
+    console.log("Fatal error!!!!! vcuser is null for talkerid: ", talkerid);
+    return;
+  }
 
   if (room) {
     try {
@@ -75,12 +80,12 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
         if (!text) return
         const username = `${topic.toString()}-${contact.toString()}`
         if (/^(usage|额度|用量)/gim.test(text)) {
-          const humanUsage = await messageManager.getUsagePrint(vcuser?._id!);
+          const humanUsage = await messageManager.getUsagePrint(vcuser._id);
           console.log(humanUsage)
           await message.say(humanUsage!);
           return
         }
-        let reply = await sendMessage(text, vcuser?._id!);
+        let reply = await sendMessage(text, vcuser._id);
         if (/\[errored\]$/gim.test(reply)) {
           reply = "遇到问题了，请稍后再试！";
         }
@@ -120,19 +125,19 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   //   }
   // }
   if (/^(clear|退出|exit|quit)/gim.test(text)) {    
-    await resetMessage(vcuser?._id!);
+    await resetMessage(vcuser._id);
     await message.say("退出成功！");
     return;
   }
   if (/^(reset|重置)/gim.test(text)) {
-    await resetMessage(vcuser?._id!);
+    await resetMessage(vcuser._id);
     await message.say("重置对话成功！");
     await asyncSleep(1 * 1e3);
     await message.say("您可以输入新的内容了！");
     return;
   }
   if (/^(usage|额度|用量)/gim.test(text)) {
-    const humanUsage = await messageManager.getUsagePrint(vcuser?._id!);
+    const humanUsage = await messageManager.getUsagePrint(vcuser._id);
     console.log(humanUsage)
     await message.say(humanUsage!);
     return
@@ -141,7 +146,7 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
     console.log(
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`
     );
-    let reply = await sendMessage(text, vcuser?._id!);
+    let reply = await sendMessage(text, vcuser._id);
     if (/\[errored\]$/gim.test(reply)) {
       reply = "遇到问题了，请稍后再试，或输入 重置 试试！";
       console.log(reply);

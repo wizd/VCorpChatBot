@@ -1,6 +1,7 @@
 import * as mongodb from "mongodb";
-const dotnev = require("dotenv");
-dotnev.config();
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const databaseName = "vcorp";
 

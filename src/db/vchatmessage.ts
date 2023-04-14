@@ -32,7 +32,7 @@ export async function addVChatMessage(msg: VChatMessage): Promise<string | null>
     return result.insertedId.toString();
   }
 
-  export async function getLatestMessages(userId: ObjectId, num: number = 3): Promise<MessageDocument[]> {
+  export async function getLatestMessages(userId: ObjectId, num = 3): Promise<MessageDocument[]> {
     const result = await withDb(async (db) => {
       const collection = db.collection<MessageDocument>("messages");
       const latestMessages = await collection.find({userId})

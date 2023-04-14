@@ -9,8 +9,8 @@ const chatWithGPT = async (messages: any[]) => {
   const headers: Record<string, any> = {
     Authorization: `Bearer thei5CeseiKosh3huR4nuKeLOhg6ohv1Hol2owuL`,// ${process.env.OPEN_AI_KEY}`,
   };
-  let apiUrl = chatGPTUrl
-  let { CHATY_PROXY } = process.env
+  const apiUrl = chatGPTUrl
+  //let { CHATY_PROXY } = process.env
   // if (CHATY_PROXY) {
   //   if (CHATY_PROXY[CHATY_PROXY.length - 1] !== '/') {
   //     CHATY_PROXY += '/'
@@ -54,7 +54,7 @@ export const messageManager = (() => {
       let ret = '没有额度信息'
       if (usage) {
         ret = ''
-        for (let prop in usage) {
+        for (const prop in usage) {
           switch (prop) {
             case 'prompt_sum': ret += `您的输入：${usage.prompt_sum}\n`; break
             case 'completion_sum': ret += `回答已用：${usage.completion_sum}\n`; break
@@ -150,7 +150,7 @@ export async function sendMessage(message: string, userId: ObjectId) {
         append = "[errored][context_length_exceeded]";
       }
       errorBody = JSON.stringify(errorBody);
-    } catch (_) { }
+    } catch (_) { /* empty */ }
     return (err as Error).message + "   " + errorBody + "[errored]";
   }
 }
