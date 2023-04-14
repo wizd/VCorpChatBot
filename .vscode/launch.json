@@ -8,7 +8,11 @@
             "<node_internals>/**"
         ],
         "type": "node",
-        "preLaunchTask": "npm: build",
+        "preLaunchTask": "npm: build",        
+        "env": {
+            "WECHATY_LOG": "verbose",
+            "WECHATY_PUPPET": "wechaty-puppet-wechat4u"
+        }
     }
     ]
 }

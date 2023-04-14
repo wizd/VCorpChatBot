@@ -8,8 +8,7 @@ import {
 import { asyncSleep } from "./utils";
 import { sendMessage, resetMessage, messageManager } from "./gptTurboApi";
 import { addUser, getOrCreateUserByWeixinId, getUserByWeixinId } from "./db/users";
-import { UserProfile } from "./db/users";
-import { calculateMembershipExpiration, parseWechatTransfer, timeRemainingReadable } from "./msgparser";
+import { handleTxMessage } from "./wctxmsg";
 
 function onScan(qrcode: string, status: number) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -23,6 +22,7 @@ function onScan(qrcode: string, status: number) {
 async function onLogin(user: ContactSelfInterface) {
   console.log(`User ${user} logged in`);
   console.log("my user id is: ", user.id);
+  console.log("my wxid is: ", process.env.BOT_WXID);
 }
 function onLogout(user: ContactSelfInterface) {
   console.log(`${user} 已经登出`);
@@ -68,14 +68,7 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   // process special messages
   // transfer message, type === 11
   if(message.type() === 11) {
-    const txtext = message.text();
-    const txinfo = parseWechatTransfer(txtext);
-    if(txinfo !== null)      {
-        const exp = calculateMembershipExpiration(txinfo.amount);
-        const expstr = timeRemainingReadable(exp);
-        await message.say(`@${contact.payload?.name}\n收到转账${txinfo.amount}元，谢谢！${txinfo.memo} 的优惠价是380, 您的会员有效期至${exp}，一共 ${expstr}`);
-    }
-
+    await handleTxMessage(vcuser, message, process.env.BOT_WXID!);
     return;
   }
 
