@@ -59,7 +59,7 @@ export async function withDb<T>(
   callback: (db: mongodb.Db) => Promise<T>
 ): Promise<T> {
   // 创建连接池实例
-  console.log("process.env.MONGODB_URI: " + process.env.MONGODB_URI);
+  //console.log("process.env.MONGODB_URI: " + process.env.MONGODB_URI);
   const mongoClientPool = new MongoClientPool(process.env.MONGODB_URI || "");
 
   // 获取 MongoDB 客户端实例和数据库对象
@@ -74,21 +74,15 @@ export async function withDb<T>(
 }
 
 async function createSampleIndex() {
-    console.log("process.env.MONGODB_URI: " + process.env.MONGODB_URI);
-    const mongoClientPool = new MongoClientPool(process.env.MONGODB_URI || "");
-    
-    try {
-      // 在名为 "myCollection" 的集合上创建一个字段名为 "field" 的升序索引
-      const indexName = await mongoClientPool.createIndex(databaseName, "users", { accountId: 1 });
-      console.log(`Created index: ${indexName}`);
+  await withDb(async (db) => {
+    const collection = db.collection('users');
+      // 为 accountId 字段创建允许空值的唯一索引
+  await collection.createIndex({ accountId: 1 }, { unique: true, partialFilterExpression: { accountId: { $exists: true } } });
 
-      const indexName2 = await mongoClientPool.createIndex(databaseName, "users", { weixinId: 1 });
-      console.log(`Created index: ${indexName2}`);
-    } catch (err) {
-      console.error("Error creating index:", err);
-    } finally {
-      await mongoClientPool.close();
-    }
-  }
+  // 为 weixinId 字段创建允许空值的唯一索引
+  await collection.createIndex({ weixinId: 1 }, { unique: true, partialFilterExpression: { weixinId: { $exists: true } } });
+
+  });    
+}
   
   createSampleIndex();

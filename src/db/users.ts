@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { ObjectId, ReturnDocument } from "mongodb";
 import { withDb } from "./db";
 
 // 定义 MongoDB 中的用户文档对象的结构
@@ -56,6 +56,32 @@ export async function getUserByWeixinId(
     });
   
     return result ?? null;
+  }
+
+  export async function getOrCreateUserByWeixinId(
+    wxid: string
+  ): Promise<UserProfile | null> {
+    const result = await withDb(async (db) => {
+      const collection = db.collection<UserProfile>('users');
+      const query: Partial<UserProfile> = { weixinId: wxid };
+  
+      // 如果找到了用户，就返回这个用户；否则，创建一个新用户
+      const update = {
+        $setOnInsert: {
+          weixinId: wxid,
+        },
+      };
+  
+      const options = {
+        upsert: true, // 如果没有找到匹配的文档，则插入一个新文档
+        returnDocument: ReturnDocument.AFTER, // 返回修改后的文档
+      };
+  
+      const { value: user } = await collection.findOneAndUpdate(query, update, options);
+      return user;
+    });
+  
+    return result;
   }
 
 export async function addUser(user: UserProfile): Promise<string | null> {

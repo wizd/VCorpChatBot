@@ -1,4 +1,7 @@
+import { ObjectId } from "mongodb";
 import { fetchApi } from "./utils";
+import { addUsage, getTokensSumByUserId, getTotalUsage } from "./db/usage";
+import { addVChatMessage, deleteAllMessagesByUserId, getLatestMessages } from "./db/vchatmessage";
 
 const chatGPTUrl = "http://192.168.3.59:4004/v1/chat/completions";
 
@@ -28,74 +31,103 @@ const chatWithGPT = async (messages: any[]) => {
 };
 
 export const messageManager = (() => {
-  let messageMap: Record<string, any[]> = {};
-  let usageList: Record<string, any[]> = {};
   return {
-    addUsage: (usage: any, user: string) => {
+    addUsage: async (usage: any, userId: ObjectId) => {
       // {prompt_tokens: 10, completion_tokens: 17, total_tokens: 27}
-      if (!usageList[user]) {
-        usageList[user] = []
-      }
-      console.log("add usage for user: ", user);
+      console.log("add usage for userId: ", userId);
       console.log("add usage: ", usage);
-      usageList[user].push(usage);
+      await addUsage({
+        userId,
+        time: new Date(),
+        prompt_tokens: usage.prompt_tokens,
+        completion_tokens: usage.completion_tokens,
+        total_tokens: usage.total_tokens,
+      });
     },
-    getUsage: (user: string) => {
-      if (usageList[user]) {
-        return usageList[user]
-      }
+    getUsage: async (userId: ObjectId) => {
+      return await getTotalUsage(userId);
     },
-    getUsagePrint: (user: string) => {
-      const allUsage = usageList[user]
-      if (!(allUsage && allUsage.length)) return
-      const usage = allUsage[allUsage.length - 1]
+    getUsagePrint: async (userId: ObjectId) => {
+      console.log(`getting usage for ${userId}...`);
+      const usage = await getTokensSumByUserId(userId);
+      console.log(`usage for ${userId}: `, usage);
       let ret = '没有额度信息'
       if (usage) {
         ret = ''
         for (let prop in usage) {
           switch (prop) {
-            case 'prompt_tokens': ret += `您的输入：${usage.prompt_tokens}\n`; break
-            case 'completion_tokens': ret += `回答已用：${usage.completion_tokens}\n`; break
-            case 'total_tokens': ret += `共计：${usage.total_tokens}\n`; break
+            case 'prompt_sum': ret += `您的输入：${usage.prompt_sum}\n`; break
+            case 'completion_sum': ret += `回答已用：${usage.completion_sum}\n`; break
+            case 'total_sum': ret += `共计：${usage.total_sum}\n`; break
           }
         }
       }
+      console.log(`usage for ${userId} print: `, ret);
       return ret
     },
-    sendMessage: (content: string, user: string) => {
-      if (!messageMap[user]) {
-        messageMap[user] = [];
-      }
-      messageMap[user].push({ role: "user", content });
+
+    addUserMessage: async (message: string, userId: ObjectId) => {
+      await addVChatMessage({
+        userId,
+        isFromAI: false,
+        message,
+        type: 0,
+        time: new Date(),
+      });
     },
-    concatAnswer: (content: string, user: string) => {
-      if (!messageMap[user]) {
-        messageMap[user] = [];
-      }
-      messageMap[user].push({ role: "assistant", content });
+
+    addAIMessage: async (message: string, userId: ObjectId) => {
+      await addVChatMessage({
+        userId,
+        isFromAI: true,
+        message,
+        type: 0,
+        time: new Date(),
+      });
     },
-    getMessages: (user: string) => {
-      return messageMap[user];
+
+    // sendMessage: (content: string, user: string) => {
+    //   if (!messageMap[user]) {
+    //     messageMap[user] = [];
+    //   }
+    //   messageMap[user].push({ role: "user", content });
+    // },
+    // concatAnswer: (content: string, user: string) => {
+    //   if (!messageMap[user]) {
+    //     messageMap[user] = [];
+    //   }
+    //   messageMap[user].push({ role: "assistant", content });
+    // },
+    getMessages: async (userId: ObjectId) => {
+      const messages = await getLatestMessages(userId);
+      console.log("getLatestMessages: ", messages);
+      return messages.map((message) => {
+        const role = message.isFromAI ? "assistant" : "user";
+        return {
+          role,
+          content: message.message,
+        };
+      });
     },
-    shiftMessage: (user: string) => {
-      messageMap[user].shift();
-    },
-    popMessage: (user: string) => {
-      messageMap[user].pop();
-    },
-    clearMessage: (user: string) => {
-      delete messageMap[user];
+    // shiftMessage: (user: string) => {
+    //   messageMap[user].shift();
+    // },
+    // popMessage: (user: string) => {
+    //   messageMap[user].pop();
+    // },
+    clearMessage: async (userId: ObjectId) => {
+      await deleteAllMessagesByUserId(userId);
     },
   };
 })();
 
-export async function resetMessage(user: string) {
-  messageManager.clearMessage(user);
+export async function resetMessage(userId: ObjectId) {
+  await messageManager.clearMessage(userId);
 }
-export async function sendMessage(message: string, user: string) {
+export async function sendMessage(message: string, userId: ObjectId) {
   try {
-    messageManager.sendMessage(message, user);
-    const messages = messageManager.getMessages(user);
+    messageManager.addUserMessage(message, userId);
+    const messages = await messageManager.getMessages(userId);
     console.log("-----------newMessages----------");
     console.log(messages);
     console.log("-----------newMessages----------");
@@ -105,11 +137,10 @@ export async function sendMessage(message: string, user: string) {
     console.log("-----------newAnswers----------");
     console.log(answer);
     console.log("-----------newAnswers----------");
-    messageManager.concatAnswer(answer, user);
-    messageManager.addUsage(completion.usage, user);
+    await messageManager.addAIMessage(answer, userId);
+    messageManager.addUsage(completion.usage, userId);
     return answer;
   } catch (err) {
-    messageManager.popMessage(user);
     console.log((err as Error).message);
     let errorBody = (err as Error & { response: any })?.response?.data;
     console.log(errorBody);

@@ -7,10 +7,8 @@ import {
 } from "wechaty/impls";
 import { asyncSleep } from "./utils";
 import { sendMessage, resetMessage, messageManager } from "./gptTurboApi";
-import { addUser, getUserByWeixinId } from "./db/users";
+import { addUser, getOrCreateUserByWeixinId, getUserByWeixinId } from "./db/users";
 import { UserProfile } from "./db/users";
-
-let myuserid = "";
 
 function onScan(qrcode: string, status: number) {
   require("qrcode-terminal").generate(qrcode, { small: true }); // 在console端显示二维码
@@ -23,7 +21,6 @@ function onScan(qrcode: string, status: number) {
 async function onLogin(user: ContactSelfInterface) {
   console.log(`User ${user} logged in`);
   console.log("my user id is: ", user.id);
-  myuserid = user.id;
 }
 function onLogout(user: ContactSelfInterface) {
   console.log(`${user} 已经登出`);
@@ -46,7 +43,7 @@ async function onFriendship(
     console.error(e);
   }
 }
-let gptUserList: ContactInterface[] = [];
+
 async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   const contact = message.talker();
   const room = message.room();
@@ -56,6 +53,11 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   //console.log("contact ID is: ", contact.id);
   //console.log("room is: ", room);
   console.log("message is: ", message);
+
+  // get talkerid
+  const talkerid = message.talker().id;
+  console.log("talkerid is: ", talkerid);
+  const vcuser = await getOrCreateUserByWeixinId(talkerid);
 
   if (room) {
     try {
@@ -67,30 +69,18 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
       //console.log("talkTos is: ", talkTos);
       //if(talkTos.includes(bot.currentUser.id)) return;
 
-      // get talkerid
-      const talkerid = message.talker().id;
-      console.log("talkerid is: ", talkerid);
-      const vcuser = await getUserByWeixinId(talkerid);
-      if(!vcuser) {
-        console.log("a new user");
-        const newvcuser : UserProfile = {
-          weixinId: talkerid,
-        };
-        await addUser(newvcuser);
-      }
-
       console.log(`room topic is : ${topic}, ${text}`)
       if (text.indexOf(`@${selfName}`) !== -1) {
-        text = text.split(`@${selfName}`)[1].trim()
+        text = text.replace(`@${selfName}`, "").trim()
         if (!text) return
         const username = `${topic.toString()}-${contact.toString()}`
         if (/^(usage|额度|用量)/gim.test(text)) {
-          const humanUsage = await messageManager.getUsagePrint(username);
+          const humanUsage = await messageManager.getUsagePrint(vcuser?._id!);
           console.log(humanUsage)
           await message.say(humanUsage!);
           return
         }
-        let reply = await sendMessage(text, username);
+        let reply = await sendMessage(text, vcuser?._id!);
         if (/\[errored\]$/gim.test(reply)) {
           reply = "遇到问题了，请稍后再试！";
         }
@@ -111,15 +101,9 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
     `[${new Date().toLocaleString()}] contact: ${contact}, text:${text}, room: ${room}`
   );
   
-  if (!gptUserList.includes(contact)) {
-    gptUserList.push(contact);
-  }
-
-  if (/(你|您)好$/gim.test(text) || /hello/gim.test(text)) {
-    if (!gptUserList.includes(contact)) {
+  if (/(你|您)好$/gim.test(text) || /hello/gim.test(text)) {    
       message.say(
-        `
-欢迎使用Chaty-基于chatGPT的AI助手~
+        `欢迎来到人工智能时代！我是基于chatGPT的AI助手~
 您可以输入:
 开始|start: 进入对话
 重置|reset: 重置对话(开始一段新对话)
@@ -127,39 +111,37 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
 祝您旅途愉快！
 `
       );
-      return;
-    }
+      return;    
   }
-  if (/^(开始|start)/gim.test(text)) {
-    if (!gptUserList.includes(contact)) {
-      gptUserList.push(contact);
-      text = "你好";
-    }
-  }
-  if (/^(clear|退出|exit|quit)/gim.test(text)) {
-    gptUserList = gptUserList.filter((user) => user !== contact);
-    await resetMessage(contact.toString());
+  // if (/^(开始|start)/gim.test(text)) {
+  //   if (!gptUserList.includes(contact)) {
+  //     gptUserList.push(contact);
+  //     text = "你好";
+  //   }
+  // }
+  if (/^(clear|退出|exit|quit)/gim.test(text)) {    
+    await resetMessage(vcuser?._id!);
     await message.say("退出成功！");
     return;
   }
   if (/^(reset|重置)/gim.test(text)) {
-    await resetMessage(contact.toString());
+    await resetMessage(vcuser?._id!);
     await message.say("重置对话成功！");
     await asyncSleep(1 * 1e3);
     await message.say("您可以输入新的内容了！");
     return;
   }
   if (/^(usage|额度|用量)/gim.test(text)) {
-    const humanUsage = await messageManager.getUsagePrint(contact.toString());
+    const humanUsage = await messageManager.getUsagePrint(vcuser?._id!);
     console.log(humanUsage)
     await message.say(humanUsage!);
     return
   }
-  if (gptUserList.includes(contact) && text) {
+  if (text) {
     console.log(
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`
     );
-    let reply = await sendMessage(text, contact.toString());
+    let reply = await sendMessage(text, vcuser?._id!);
     if (/\[errored\]$/gim.test(reply)) {
       reply = "遇到问题了，请稍后再试，或输入 重置 试试！";
       console.log(reply);
