@@ -52,7 +52,7 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
 
   //console.log("contact is: ", contact);
   //console.log("contact ID is: ", contact.id);
-  //console.log("room is: ", room);
+  console.log("room is: ", room);
   console.log("message is: ", message);
 
   // get talkerid
@@ -80,12 +80,12 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
         if (!text) return
         const username = `${topic.toString()}-${contact.toString()}`
         if (/^(usage|额度|用量)/gim.test(text)) {
-          const humanUsage = await messageManager.getUsagePrint(vcuser._id);
+          const humanUsage = await messageManager.getUsagePrint(vcuser._id, room.id);
           console.log(humanUsage)
           await message.say(humanUsage!);
           return
         }
-        let reply = await sendMessage(text, vcuser._id);
+        let reply = await sendMessage(text, vcuser._id, room.id);
         if (/\[errored\]$/gim.test(reply)) {
           reply = "遇到问题了，请稍后再试！";
         }

@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { fetchApi } from "./utils";
-import { addUsage, getTokensSumByUserId, getTotalUsage } from "./db/usage";
+import { addUsage, getTokensSumByUserId, getTokensSumByWeixinRoomId, getTotalUsage } from "./db/usage";
 import { addVChatMessage, deleteAllMessagesByUserId, getLatestMessages } from "./db/vchatmessage";
 
 const chatGPTUrl = "http://192.168.3.59:4004/v1/chat/completions";
@@ -32,12 +32,13 @@ const chatWithGPT = async (messages: any[]) => {
 
 export const messageManager = (() => {
   return {
-    addUsage: async (usage: any, userId: ObjectId) => {
+    addUsage: async (usage: any, userId: ObjectId, roomWeixinId? : string) => {
       // {prompt_tokens: 10, completion_tokens: 17, total_tokens: 27}
       console.log("add usage for userId: ", userId);
       console.log("add usage: ", usage);
       await addUsage({
         userId,
+        roomWeixinId,
         time: new Date(),
         prompt_tokens: usage.prompt_tokens,
         completion_tokens: usage.completion_tokens,
@@ -47,21 +48,30 @@ export const messageManager = (() => {
     getUsage: async (userId: ObjectId) => {
       return await getTotalUsage(userId);
     },
-    getUsagePrint: async (userId: ObjectId) => {
+    getUsagePrint: async (userId: ObjectId, roomWeixinId? : string) => {
       console.log(`getting usage for ${userId}...`);
-      const usage = await getTokensSumByUserId(userId);
-      console.log(`usage for ${userId}: `, usage);
-      let ret = '没有额度信息'
-      if (usage) {
-        ret = ''
-        for (const prop in usage) {
-          switch (prop) {
-            case 'prompt_sum': ret += `您的输入：${usage.prompt_sum}\n`; break
-            case 'completion_sum': ret += `回答已用：${usage.completion_sum}\n`; break
-            case 'total_sum': ret += `共计：${usage.total_sum}\n`; break
+      
+      let ret = ''
+      const printUsage = (owner: string, usage: any) => {
+        if (usage) {
+          for (const prop in usage) {
+            switch (prop) {
+              case 'prompt_sum': ret += `${owner}输入：${usage.prompt_sum}\n`; break
+              case 'completion_sum': ret += `${owner}回答：${usage.completion_sum}\n`; break
+              case 'total_sum': ret += `共计：${usage.total_sum}\n`; break
+            }
           }
         }
+        ret += '\n'
       }
+      const usage = await getTokensSumByUserId(userId);   
+      printUsage("我的", usage);
+      if(roomWeixinId)
+      {
+        const roomUsage = await getTokensSumByWeixinRoomId(roomWeixinId);   
+        printUsage("群", roomUsage);
+      }
+     
       console.log(`usage for ${userId} print: `, ret);
       return ret
     },
@@ -124,9 +134,9 @@ export const messageManager = (() => {
 export async function resetMessage(userId: ObjectId) {
   await messageManager.clearMessage(userId);
 }
-export async function sendMessage(message: string, userId: ObjectId) {
+export async function sendMessage(message: string, userId: ObjectId, roomWeixinId?: string) {
   try {
-    messageManager.addUserMessage(message, userId);
+    await messageManager.addUserMessage(message, userId);
     const messages = await messageManager.getMessages(userId);
     console.log("-----------newMessages----------");
     console.log(messages);
@@ -138,7 +148,7 @@ export async function sendMessage(message: string, userId: ObjectId) {
     console.log(answer);
     console.log("-----------newAnswers----------");
     await messageManager.addAIMessage(answer, userId);
-    messageManager.addUsage(completion.usage, userId);
+    messageManager.addUsage(completion.usage, userId, roomWeixinId);
     return answer;
   } catch (err) {
     console.log((err as Error).message);
