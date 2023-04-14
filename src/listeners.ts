@@ -9,6 +9,7 @@ import { asyncSleep } from "./utils";
 import { sendMessage, resetMessage, messageManager } from "./gptTurboApi";
 import { addUser, getOrCreateUserByWeixinId, getUserByWeixinId } from "./db/users";
 import { handleTxMessage } from "./wctxmsg";
+import { addVFriendship } from "./db/friendship";
 
 function onScan(qrcode: string, status: number) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -36,6 +37,7 @@ async function onFriendship(
     switch (friendship.type()) {
       case bot.Friendship.Type.Receive:
         await friendship.accept();
+        await addVFriendship({name: friendship.contact().name(), time: new Date()});
         break;
       case bot.Friendship.Type.Confirm:
         console.log(`friend ship confirmed`);
