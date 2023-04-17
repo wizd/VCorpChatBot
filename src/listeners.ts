@@ -75,9 +75,11 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   }
 
   if(message.type() !== bot.Message.Type.Text) {
-    console.log("message type is not text, ignore it: ", message.type());
-    return;
+    console.log("message type is not text: ", message.type());
+    //return;
   }
+
+  // msg type 6 is image
 
   if (room) {
     try {
