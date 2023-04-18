@@ -1,14 +1,14 @@
-import { WechatyBuilder } from "wechaty";
-import { bindListeners } from "./src/listeners";
-import { PuppetPadlocal } from "wechaty-puppet-padlocal";
+import { WechatyBuilder } from 'wechaty';
+import { bindListeners } from './src/listeners';
+import { PuppetPadlocal } from 'wechaty-puppet-padlocal';
 
-const token = "puppet_padlocal_1d71f93437fd431cb6dd5df92e5c3dcc";
+const token = process.env.PAD_LOCAL_KEY;
 const puppet = new PuppetPadlocal({
   token,
 });
 
 const bot = WechatyBuilder.build({
-  name: "chaty-wechat-bot",
+  name: 'chaty-wechat-bot',
   puppet,
 });
 

@@ -1,6 +1,6 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from 'axios';
 import http from 'http';
-import readline from "readline";
+import readline from 'readline';
 
 axios.defaults.timeout = 60000;
 
@@ -28,15 +28,15 @@ export const asyncSleep = async (number: number) => {
 
 export const fetchApi = async (
   apiUrl: string,
-  method = "GET",
+  method = 'GET',
   params: any,
   body: any
 ) => {
   let defineHeaders = {};
-  let type: any = { "Content-Type": "application/json" };
+  let type: any = { 'Content-Type': 'application/json' };
   if (
-    (params && params.type && params.type !== "json") ||
-    (body && body.type && body.type !== "json")
+    (params && params.type && params.type !== 'json') ||
+    (body && body.type && body.type !== 'json')
   ) {
     type = {};
   }
@@ -53,8 +53,8 @@ export const fetchApi = async (
   const headers = {
     ...type,
     ...defineHeaders,
-    "User-Agent":
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+    'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
   };
   return axios(apiUrl, {
     method,
@@ -64,3 +64,13 @@ export const fetchApi = async (
   }).then((res: AxiosResponse) => res.data);
 };
 
+export function extractSubscriptionCode(text: string): string | null {
+  const regex = /兑换订阅码\s+([a-zA-Z0-9]{4}-[a-zA-Z0-9]{4})/;
+  const match = text.match(regex);
+
+  if (match && match[1]) {
+    return match[1];
+  }
+
+  return null;
+}
