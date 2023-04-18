@@ -49,6 +49,7 @@ export const messageManager = (() => {
               case 'prompt_sum': ret += `${owner}输入：${usage.prompt_sum}\n`; break
               case 'completion_sum': ret += `${owner}回答：${usage.completion_sum}\n`; break
               case 'total_sum': ret += `共计：${usage.total_sum}\n`; break
+              case 'count': ret += `次数：${usage.count}\n`; break
             }
           }
         }

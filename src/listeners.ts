@@ -10,7 +10,9 @@ import { sendMessage, resetMessage, messageManager } from "./gptTurboApi";
 import { addUser, getOrCreateUserByWeixinId, getUserByWeixinId } from "./db/users";
 import { handleTxMessage } from "./wctxmsg";
 import { addVFriendship } from "./db/friendship";
-import { VAuthCode, addVAuthCode, generateAuthCode } from "./db/authcode";
+import { VAuthCode, addVAuthCode } from "./db/authcode";
+import { generateAuthCode } from "./db/helper";
+import { handleSysConfig } from "./handlers/sysConfigHandler";
 
 function onScan(qrcode: string, status: number) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -78,6 +80,11 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   if(message.type() !== bot.Message.Type.Text) {
     console.log("message type is not text: ", message.type());
     //return;
+  }
+
+  if(text.startsWith("配置系统参数") && (room?.id === process.env.BOT_ADMIN_ROOMID || talkerid === process.env.BOT_ADMIN_WXID)){
+    await handleSysConfig(vcuser, contact, message);
+    return;
   }
 
   // msg type 6 is image
@@ -183,6 +190,7 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
     await message.say(`@${contact.payload?.name}\n\n请在10分钟内在其他平台输入下面这句话进行账户关联：\n\n关联授权 ${code}`);
     return
   }
+
   if (text) {
     console.log(
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`

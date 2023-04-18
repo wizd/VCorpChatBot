@@ -2,24 +2,7 @@ import { MessageInterface } from 'wechaty/impls';
 import { parseStringPromise } from 'xml2js';
 import { VSubscription, addVSubscription } from './db/vsubscription';
 import { UserProfile } from './db/users';
-
-export interface WeChatTransfer {
-  title: string;
-  des: string;
-  type: string;
-  content: string;
-  url: string;
-  thumburl: string;
-  transcationid: string;
-  transferid: string;
-  invalidtime: string;
-  begintransfertime: string;
-  effectivedate: string;
-  pay_memo: string;
-  receiver_username: string;
-  payer_username: string;
-}
-
+import { WeChatTransfer } from './db/sharedTypes';
 
 async function parseWeChatTransferXml(message: string): Promise<WeChatTransfer> {
     // Replace \n with newlines
