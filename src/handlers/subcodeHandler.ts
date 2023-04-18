@@ -1,7 +1,7 @@
 import { ContactInterface, MessageInterface } from 'wechaty/impls';
-import { UserProfile } from '../db/users';
-import { getVSubCode } from '../db/subcode';
-import { reedemSubCode } from '../db/vsubscription';
+import { UserProfile } from '../db/models/users';
+import { getVSubCode } from '../db/models/subcode';
+import { reedemSubCode } from '../db/models/vsubscription';
 
 export async function handleSubscriptionCode(
   vcuser: UserProfile,

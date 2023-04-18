@@ -5,7 +5,7 @@ import {
   MessageInterface,
   WechatyInterface,
 } from 'wechaty/impls';
-import { getOrCreateUserByWeixinId } from './db/users';
+import { getOrCreateUserByWeixinId } from './db/models/users';
 import { addVFriendship } from './db/friendship';
 
 import { msgRootDispatcher } from './handlers/messageDispatcher';

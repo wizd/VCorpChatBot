@@ -4,20 +4,20 @@ import {
   RoomInterface,
   WechatyInterface,
 } from 'wechaty/impls';
-import { UserProfile } from '../db/users';
+import { UserProfile } from '../db/models/users';
 import { moneyTransferHandler } from './moneyTransferHandler';
 import { handleSysConfig } from './sysConfigHandler';
 import { handleSubscription } from './subscriptionHandler';
 import { messageManager, resetMessage, sendMessage } from '../gptTurboApi';
-import { generateAuthCode } from '../db/helper';
-import { VAuthCode, addVAuthCode } from '../db/authcode';
+import { generateAuthCode } from '../db/misc/helper';
+import { VAuthCode, addVAuthCode } from '../db/models/authcode';
 import { handleSubscriptionCode } from './subcodeHandler';
 import { asyncSleep, extractSubscriptionCode } from '../utils';
-import { isUserSubscribed } from '../db/vsubscription';
+import { isUserSubscribed } from '../db/models/vsubscription';
 import {
   getTokensSumByWeixinRoomId,
   getUsageCountForLast24Hours,
-} from '../db/usage';
+} from '../db/models/usage';
 
 export const msgRootDispatcher = async (
   bot: WechatyInterface,
