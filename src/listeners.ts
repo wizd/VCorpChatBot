@@ -10,6 +10,7 @@ import { sendMessage, resetMessage, messageManager } from "./gptTurboApi";
 import { addUser, getOrCreateUserByWeixinId, getUserByWeixinId } from "./db/users";
 import { handleTxMessage } from "./wctxmsg";
 import { addVFriendship } from "./db/friendship";
+import { VAuthCode, addVAuthCode, generateAuthCode } from "./db/authcode";
 
 function onScan(qrcode: string, status: number) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -102,6 +103,10 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
           await message.say(`@${contact.payload?.name}\n${humanUsage}`);
           return
         }
+        if (/^(authcode|授权|授权码)/gim.test(text)) {
+          await message.say(`@${contact.payload?.name}\n\n无法在群内进行账号关联授权。请给我直接发消息，谢谢。`);
+          return
+        }
         let reply = await sendMessage(text, vcuser._id, room.id);
         if (/\[errored\]$/gim.test(reply)) {
           reply = "遇到问题了，请稍后再试！";
@@ -157,6 +162,25 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
     const humanUsage = await messageManager.getUsagePrint(vcuser._id);
     console.log(humanUsage)
     await message.say(humanUsage!);
+    return
+  }
+  if (/^(authcode|授权|授权码)/gim.test(text)) {
+    const code = generateAuthCode();
+    const authcode : VAuthCode = {
+      userId: vcuser._id,
+      reqFrom: "weixin",
+      time: new Date(),
+      code: code,
+      expire: new Date(Date.now() + 1000 * 60 * 10),  // 10 minutes
+      used: false
+    }
+    const codeId = await addVAuthCode(authcode);
+    if(codeId === null) {
+      console.log("addVAuthCode failed!");
+      await message.say("遇到问题了，请稍后再试！");
+      return;
+    }
+    await message.say(`@${contact.payload?.name}\n\n请在10分钟内在其他平台输入下面这句话进行账户关联：\n\n关联授权 ${code}`);
     return
   }
   if (text) {
