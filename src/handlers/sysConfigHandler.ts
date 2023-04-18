@@ -57,10 +57,11 @@ async function getConfigValues(): Promise<string> {
 export async function handleSysConfig(vcuser: UserProfile,
     contact: ContactInterface,
     message: MessageInterface,
+    input: string
     )
     {
         try{
-            const text = message.text();
+            const text = input;
             if(text.indexOf(" ") == -1)
             {
                 getConfigValues().then(async (result) => {
