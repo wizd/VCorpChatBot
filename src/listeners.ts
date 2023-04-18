@@ -4,25 +4,27 @@ import {
   FriendshipInterface,
   MessageInterface,
   WechatyInterface,
-} from "wechaty/impls";
-import { getOrCreateUserByWeixinId } from "./db/users";
-import { addVFriendship } from "./db/friendship";
+} from 'wechaty/impls';
+import { getOrCreateUserByWeixinId } from './db/users';
+import { addVFriendship } from './db/friendship';
 
-import { msgRootDispatcher } from "./handlers/messageDispatcher";
+import { msgRootDispatcher } from './handlers/messageDispatcher';
 
 function onScan(qrcode: string, status: number) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require("qrcode-terminal").generate(qrcode, { small: true }); // 在console端显示二维码
+  require('qrcode-terminal').generate(qrcode, { small: true }); // 在console端显示二维码
   const qrcodeImageUrl = [
-    "https://wechaty.js.org/qrcode/",
+    'https://wechaty.js.org/qrcode/',
     encodeURIComponent(qrcode),
-  ].join("");
+  ].join('');
   console.log(qrcodeImageUrl);
 }
+
+let botid = '';
 async function onLogin(user: ContactSelfInterface) {
   console.log(`User ${user} logged in`);
-  console.log("my user id is: ", user.id);
-  console.log("my wxid is: ", process.env.BOT_WXID);
+  console.log('my user id is: ', user.id);
+  botid = user.id;
 }
 function onLogout(user: ContactSelfInterface) {
   console.log(`${user} 已经登出`);
@@ -36,7 +38,10 @@ async function onFriendship(
     switch (friendship.type()) {
       case bot.Friendship.Type.Receive:
         await friendship.accept();
-        await addVFriendship({name: friendship.contact().name(), time: new Date()});
+        await addVFriendship({
+          name: friendship.contact().name(),
+          time: new Date(),
+        });
         break;
       case bot.Friendship.Type.Confirm:
         console.log(`friend ship confirmed`);
@@ -59,46 +64,44 @@ async function onFriendship(
 
 async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   const contact = message.talker();
-  const room = message.room();  
+  const room = message.room();
 
-  try
-  {
-    console.log("contact is: ", contact);
+  try {
+    console.log('contact is: ', contact);
     //console.log("contact ID is: ", contact.id);
-    console.log("room is: ", room);
-    console.log("message is: ", message);
-  
+    console.log('room is: ', room);
+    console.log('message is: ', message);
+
     // get talkerid
     const talkerid = message.talker().id;
-    console.log("talkerid is: ", talkerid);
+    console.log('talkerid is: ', talkerid);
     const vcuser = await getOrCreateUserByWeixinId(talkerid);
-    if(vcuser === null || vcuser._id === undefined) {
-      console.log("Fatal error!!!!! vcuser is null for talkerid: ", talkerid);
+    if (vcuser === null || vcuser._id === undefined) {
+      console.log('Fatal error!!!!! vcuser is null for talkerid: ', talkerid);
       return;
     }
 
-    await msgRootDispatcher(bot, message, contact, room, vcuser);
-  }
-  catch(err) {
-    console.log("Fatal error!!!!! vcuser is null for talkerid: ", err);
+    await msgRootDispatcher(bot, botid, message, contact, room, vcuser);
+  } catch (err) {
+    console.log('Fatal error!!!!! vcuser is null for talkerid: ', err);
     return;
   }
 
   return;
-/*
-*/
+  /*
+   */
 }
 
 const listeners = [onScan, onLogout, onLogin, onFriendship, onMessage];
 export const bindListeners = (bot: WechatyInterface) => {
   return bot
-    .on("scan", onScan)
-    .on("login", onLogin)
-    .on("logout", onLogout)
-    .on("message", (message: MessageInterface) => {
-      onMessage(message, bot)
+    .on('scan', onScan)
+    .on('login', onLogin)
+    .on('logout', onLogout)
+    .on('message', (message: MessageInterface) => {
+      onMessage(message, bot);
     })
-    .on("friendship", (friendship: FriendshipInterface) =>
+    .on('friendship', (friendship: FriendshipInterface) =>
       onFriendship(friendship, bot)
     );
 };

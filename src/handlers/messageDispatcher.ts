@@ -16,6 +16,7 @@ import { asyncSleep, extractSubscriptionCode } from '../utils';
 
 export const msgRootDispatcher = async (
   bot: WechatyInterface,
+  botid: string,
   message: MessageInterface,
   contact: ContactInterface,
   room: RoomInterface | undefined,
@@ -31,14 +32,7 @@ export const msgRootDispatcher = async (
   }
 
   if (message.type() === 11) {
-    await moneyTransferHandler(
-      vcuser,
-      message,
-      input,
-      contact,
-      room,
-      process.env.BOT_WXID!
-    );
+    await moneyTransferHandler(vcuser, message, input, contact, room, botid);
     return;
   }
 
