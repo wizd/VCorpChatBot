@@ -13,6 +13,11 @@ import { generateAuthCode } from '../db/helper';
 import { VAuthCode, addVAuthCode } from '../db/authcode';
 import { handleSubscriptionCode } from './subcodeHandler';
 import { asyncSleep, extractSubscriptionCode } from '../utils';
+import { isUserSubscribed } from '../db/vsubscription';
+import {
+  getTokensSumByWeixinRoomId,
+  getUsageCountForLast24Hours,
+} from '../db/usage';
 
 export const msgRootDispatcher = async (
   bot: WechatyInterface,
@@ -92,6 +97,16 @@ export const msgRootDispatcher = async (
           );
           return;
         }
+
+        // count room usage
+        const rusage = await getTokensSumByWeixinRoomId(room.id);
+        if (rusage.count >= 100) {
+          await message.say(
+            '本群今天的免费使用额度（100轮对话）已经用完了，如果想继续使用，请兑换订阅码或者成为会员。'
+          );
+          return;
+        }
+
         let reply = await sendMessage(text, vcuser._id!, room.id);
         if (/\[errored\]$/gim.test(reply)) {
           reply = '遇到问题了，请稍后再试！';
@@ -193,6 +208,18 @@ export const msgRootDispatcher = async (
   }
 
   if (text) {
+    // check if free use is out
+    const subscribed = await isUserSubscribed(vcuser._id!);
+    if (!subscribed) {
+      const count = await getUsageCountForLast24Hours(vcuser._id!);
+      if (count >= 5) {
+        await message.say(
+          '您今天的免费使用额度已经用完了，如果想继续使用，请兑换订阅码或者成为会员。'
+        );
+        return;
+      }
+    }
+
     console.log(
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`
     );
