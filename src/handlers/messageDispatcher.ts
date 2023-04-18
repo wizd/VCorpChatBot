@@ -50,6 +50,10 @@ export const msgRootDispatcher = async (
 
   let text = input;
   const talkerid = message.talker().id;
+  if (talkerid === 'weixin') {
+    console.log('message from weixin: ', message.text());
+    return;
+  }
 
   if (room) {
     try {
