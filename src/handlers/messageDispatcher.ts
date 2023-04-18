@@ -107,6 +107,13 @@ export const msgRootDispatcher = async (
           return;
         }
 
+        if (rusage.count >= 60) {
+          await message.say(
+            '本群今天的免费使用额度（100轮对话）即将用完，如果想继续使用，请兑换订阅码或者成为会员。'
+          );
+          return;
+        }
+
         let reply = await sendMessage(text, vcuser._id!, room.id);
         if (/\[errored\]$/gim.test(reply)) {
           reply = '遇到问题了，请稍后再试！';
