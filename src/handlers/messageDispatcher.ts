@@ -125,58 +125,36 @@ export const msgRootDispatcher = async (
     `[${new Date().toLocaleString()}] contact: ${contact}, text:${text}, room: ${room}`
   );
 
-  if (/(你|您)好$/gim.test(text) || /hello/gim.test(text)) {
-    message.say(
-      `欢迎来到人工智能时代！我是基于chatGPT的AI助手~
-您可以输入:
-开始|start: 进入对话
-重置|reset: 重置对话(开始一段新对话)
-退出|exit : 退出对话
-祝您旅途愉快！
-`
-    );
-    return;
-  }
+  //   if (/(你|您)好$/gim.test(text) || /hello/gim.test(text)) {
+  //     message.say(
+  //       `欢迎来到人工智能时代！我是基于chatGPT的AI助手~
+  // 您可以输入:
+  // 开始|start: 进入对话
+  // 重置|reset: 重置对话(开始一段新对话)
+  // 退出|exit : 退出对话
+  // 祝您旅途愉快！
+  // `
+  //     );
+  //     return;
+  //   }
   // if (/^(开始|start)/gim.test(text)) {
   //   if (!gptUserList.includes(contact)) {
   //     gptUserList.push(contact);
   //     text = "你好";
   //   }
   // }
-  if (/^(clear|退出|exit|quit)/gim.test(text)) {
-    await resetMessage(ssoid);
-    await message.say('退出成功！');
-    return;
-  }
-  if (/^(reset|重置)/gim.test(text)) {
-    await resetMessage(ssoid);
-    await message.say('重置对话成功！');
-    await asyncSleep(1 * 1e3);
-    await message.say('您可以输入新的内容了！');
-    return;
-  }
-
-  if (/^(authcode|授权|授权码)/gim.test(text)) {
-    const code = generateAuthCode();
-    const authcode: VAuthCode = {
-      ssoid: ssoid,
-      reqFrom: 'weixin',
-      time: new Date(),
-      code: code,
-      expire: new Date(Date.now() + 1000 * 60 * 10), // 10 minutes
-      used: false,
-    };
-    const codeId = await addVAuthCode(authcode);
-    if (codeId === null) {
-      console.log('addVAuthCode failed!');
-      await message.say('遇到问题了，请稍后再试！');
-      return;
-    }
-    await message.say(
-      `@${contact.payload?.name}\n\n请在10分钟内在其他平台输入下面这句话进行账户关联：\n\n关联授权 ${code}`
-    );
-    return;
-  }
+  // if (/^(clear|退出|exit|quit)/gim.test(text)) {
+  //   await resetMessage(ssoid);
+  //   await message.say('退出成功！');
+  //   return;
+  // }
+  // if (/^(reset|重置)/gim.test(text)) {
+  //   await resetMessage(ssoid);
+  //   await message.say('重置对话成功！');
+  //   await asyncSleep(1 * 1e3);
+  //   await message.say('您可以输入新的内容了！');
+  //   return;
+  // }
 
   if (text.indexOf('兑换订阅码') > -1) {
     const code = extractSubscriptionCode(text);
