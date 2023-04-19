@@ -29,13 +29,13 @@ async function getReadableSubscriptions(userId: ObjectId): Promise<string> {
 }
 
 export async function handleSubscription(
-  vcuser: UserProfile,
+  ssoid: ObjectId,
   contact: ContactInterface,
   message: MessageInterface,
   input: string
 ) {
   // get  current subscription recoreds and show them
-  getReadableSubscriptions(vcuser._id!).then(async (result) => {
+  getReadableSubscriptions(ssoid).then(async (result) => {
     console.log(result);
     await message.say(result);
   });

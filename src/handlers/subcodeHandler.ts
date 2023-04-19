@@ -1,10 +1,10 @@
 import { ContactInterface, MessageInterface } from 'wechaty/impls';
-import { UserProfile } from '../db/models/users';
 import { getVSubCode } from '../db/models/subcode';
 import { reedemSubCode } from '../db/models/vsubscription';
+import { ObjectId } from 'mongodb';
 
 export async function handleSubscriptionCode(
-  vcuser: UserProfile,
+  ssoid: ObjectId,
   contact: ContactInterface,
   message: MessageInterface,
   code: string
@@ -28,7 +28,7 @@ export async function handleSubscriptionCode(
   }
 
   try {
-    const redeemResult = await reedemSubCode(subcode, vcuser._id!);
+    const redeemResult = await reedemSubCode(subcode, ssoid);
     if (redeemResult) {
       await message.say('订阅码兑换成功。');
     } else {

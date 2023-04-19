@@ -9,6 +9,7 @@ import { getOrCreateUserByWeixinId } from './db/models/users';
 import { addVFriendship } from './db/friendship';
 
 import { msgRootDispatcher } from './handlers/messageDispatcher';
+import { getOrCreateSSOByWeixinId } from './db/models/sso';
 
 function onScan(qrcode: string, status: number) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -75,13 +76,14 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
     // get talkerid
     const talkerid = message.talker().id;
     console.log('talkerid is: ', talkerid);
+    const ssoid = await getOrCreateSSOByWeixinId(talkerid);
     const vcuser = await getOrCreateUserByWeixinId(talkerid);
     if (vcuser === null || vcuser._id === undefined) {
       console.log('Fatal error!!!!! vcuser is null for talkerid: ', talkerid);
       return;
     }
 
-    await msgRootDispatcher(bot, botid, message, contact, room, vcuser);
+    await msgRootDispatcher(bot, botid, message, contact, room, ssoid);
   } catch (err) {
     console.log('Fatal error!!!!! vcuser is null for talkerid: ', err);
     return;

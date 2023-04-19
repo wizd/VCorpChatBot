@@ -16,6 +16,7 @@ import {
   getVSubCodeByTxId,
 } from '../db/models/subcode';
 import { Message } from 'wechaty';
+import { ObjectId } from 'mongodb';
 
 async function parseWeChatTransferXml(
   message: string
@@ -64,7 +65,7 @@ const parseMoney = (str: string): number => {
 };
 
 export async function moneyTransferHandler(
-  vcuser: UserProfile,
+  ssoid: ObjectId,
   message: MessageInterface,
   input: string,
   contact: ContactInterface,
@@ -72,11 +73,6 @@ export async function moneyTransferHandler(
   botWxId: string
 ): Promise<void> {
   try {
-    if (vcuser === null || vcuser._id === undefined) {
-      console.log('vcuser is null');
-      return;
-    }
-
     const txtext = input;
 
     parseWeChatTransferXml(txtext).then(async (transfer) => {
@@ -141,7 +137,7 @@ export async function moneyTransferHandler(
       const aYearFromNow = new Date();
       aYearFromNow.setFullYear(aYearFromNow.getFullYear() + 1);
       const subcode: VSubCode = {
-        userId: vcuser._id!,
+        userId: ssoid,
         code: code,
         time: new Date(),
         timeSpanInMs: aYearFromNow.getTime() - new Date().getTime(),

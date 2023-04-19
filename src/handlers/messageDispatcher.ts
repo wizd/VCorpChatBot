@@ -4,7 +4,6 @@ import {
   RoomInterface,
   WechatyInterface,
 } from 'wechaty/impls';
-import { UserProfile } from '../db/models/users';
 import { moneyTransferHandler } from './moneyTransferHandler';
 import { handleSysConfig } from './sysConfigHandler';
 import { handleSubscription } from './subscriptionHandler';
@@ -18,6 +17,7 @@ import {
   getTokensSumByWeixinRoomId,
   getUsageCountForLast24Hours,
 } from '../db/models/usage';
+import { ObjectId } from 'mongodb';
 
 export const msgRootDispatcher = async (
   bot: WechatyInterface,
@@ -25,7 +25,7 @@ export const msgRootDispatcher = async (
   message: MessageInterface,
   contact: ContactInterface,
   room: RoomInterface | undefined,
-  vcuser: UserProfile
+  ssoid: ObjectId
 ) => {
   // process special messages
   // transfer message, type === 11
@@ -37,7 +37,7 @@ export const msgRootDispatcher = async (
   }
 
   if (message.type() === 11) {
-    await moneyTransferHandler(vcuser, message, input, contact, room, botid);
+    await moneyTransferHandler(ssoid, message, input, contact, room, botid);
     return;
   }
 
@@ -77,20 +77,17 @@ export const msgRootDispatcher = async (
           (room?.id === process.env.BOT_ADMIN_ROOMID ||
             talkerid === process.env.BOT_ADMIN_WXID)
         ) {
-          await handleSysConfig(vcuser, contact, message, text);
+          await handleSysConfig(ssoid, contact, message, text);
           return;
         }
 
         if (text === '会员') {
-          await handleSubscription(vcuser, contact, message, text);
+          await handleSubscription(ssoid, contact, message, text);
           return;
         }
 
         if (/^(usage|额度|用量)/gim.test(text)) {
-          const humanUsage = await messageManager.getUsagePrint(
-            vcuser._id!,
-            room.id
-          );
+          const humanUsage = await messageManager.getUsagePrint(ssoid, room.id);
           console.log(humanUsage);
           await message.say(`@${contact.payload?.name}\n${humanUsage}`);
           return;
@@ -118,7 +115,7 @@ export const msgRootDispatcher = async (
           return;
         }
 
-        let reply = await sendMessage(text, vcuser._id!, room.id);
+        let reply = await sendMessage(text, ssoid, room.id);
         if (/\[errored\]$/gim.test(reply)) {
           reply = '遇到问题了，请稍后再试！';
         }
@@ -158,19 +155,19 @@ export const msgRootDispatcher = async (
   //   }
   // }
   if (/^(clear|退出|exit|quit)/gim.test(text)) {
-    await resetMessage(vcuser._id!);
+    await resetMessage(ssoid);
     await message.say('退出成功！');
     return;
   }
   if (/^(reset|重置)/gim.test(text)) {
-    await resetMessage(vcuser._id!);
+    await resetMessage(ssoid);
     await message.say('重置对话成功！');
     await asyncSleep(1 * 1e3);
     await message.say('您可以输入新的内容了！');
     return;
   }
   if (/^(usage|额度|用量)/gim.test(text)) {
-    const humanUsage = await messageManager.getUsagePrint(vcuser._id!);
+    const humanUsage = await messageManager.getUsagePrint(ssoid);
     console.log(humanUsage);
     await message.say(humanUsage!);
     return;
@@ -178,7 +175,7 @@ export const msgRootDispatcher = async (
   if (/^(authcode|授权|授权码)/gim.test(text)) {
     const code = generateAuthCode();
     const authcode: VAuthCode = {
-      userId: vcuser._id!,
+      userId: ssoid,
       reqFrom: 'weixin',
       time: new Date(),
       code: code,
@@ -200,13 +197,13 @@ export const msgRootDispatcher = async (
   if (text.indexOf('兑换订阅码') > -1) {
     const code = extractSubscriptionCode(text);
     if (code) {
-      await handleSubscriptionCode(vcuser, contact, message, code);
+      await handleSubscriptionCode(ssoid, contact, message, code);
       return;
     }
   }
 
   if (text === '会员') {
-    await handleSubscription(vcuser, contact, message, text);
+    await handleSubscription(ssoid, contact, message, text);
     return;
   }
 
@@ -220,9 +217,9 @@ export const msgRootDispatcher = async (
 
   if (text) {
     // check if free use is out
-    const subscribed = await isUserSubscribed(vcuser._id!);
+    const subscribed = await isUserSubscribed(ssoid);
     if (!subscribed) {
-      const count = await getUsageCountForLast24Hours(vcuser._id!);
+      const count = await getUsageCountForLast24Hours(ssoid);
       if (count >= 5) {
         await message.say(
           '您今天的免费使用额度已经用完了，如果想继续使用，请兑换订阅码或者成为会员。'
@@ -234,7 +231,7 @@ export const msgRootDispatcher = async (
     console.log(
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`
     );
-    let reply = await sendMessage(text, vcuser._id!);
+    let reply = await sendMessage(text, ssoid);
     if (/\[errored\]$/gim.test(reply)) {
       reply = '遇到问题了，请稍后再试，或输入 重置 试试！';
       console.log(reply);

@@ -65,7 +65,7 @@ async function handleUserInput(
 }
 
 export async function handleSysConfig(
-  vcuser: UserProfile,
+  ssoid: ObjectId,
   contact: ContactInterface,
   message: MessageInterface,
   input: string
@@ -82,7 +82,7 @@ export async function handleSysConfig(
         );
       });
     } else {
-      await handleUserInput(text, vcuser._id!).then(async (result) => {
+      await handleUserInput(text, ssoid).then(async (result) => {
         await message.say('已更新');
       });
     }
