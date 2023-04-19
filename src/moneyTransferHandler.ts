@@ -4,17 +4,17 @@ import {
   RoomInterface,
 } from 'wechaty/impls';
 import { parseStringPromise } from 'xml2js';
-import { VSubscription, addVSubscription } from '../db/models/vsubscription';
-import { UserProfile } from '../db/models/users';
-import { WeChatTransfer } from '../db/misc/sharedTypes';
-import { getVCorpConfigByName } from '../db/models/sysconfig';
-import { generateAuthCode } from '../db/misc/helper';
+import { VSubscription, addVSubscription } from './db/models/vsubscription';
+import { UserProfile } from './db/models/users';
+import { WeChatTransfer } from './db/misc/sharedTypes';
+import { getVCorpConfigByName } from './db/models/sysconfig';
+import { generateAuthCode } from './db/misc/helper';
 import {
   VSubCode,
   addVSubCode,
   getVSubCode,
   getVSubCodeByTxId,
-} from '../db/models/subcode';
+} from './db/models/subcode';
 import { Message } from 'wechaty';
 import { ObjectId } from 'mongodb';
 

@@ -5,20 +5,15 @@ import {
   WechatyInterface,
 } from 'wechaty/impls';
 import { moneyTransferHandler } from './moneyTransferHandler';
-import { handleSysConfig } from './sysConfigHandler';
-import { handleSubscription } from '../db/convo/subscriptionHandler';
-import { messageManager, resetMessage, sendMessage } from '../gptTurboApi';
-import { generateAuthCode } from '../db/misc/helper';
-import { VAuthCode, addVAuthCode } from '../db/models/authcode';
-import { handleSubscriptionCode } from './subcodeHandler';
-import { asyncSleep, extractSubscriptionCode } from '../utils';
-import { isUserSubscribed } from '../db/models/vsubscription';
+import { isUserSubscribed } from './db/models/vsubscription';
 import {
   getTokensSumByWeixinRoomId,
   getUsageCountForLast24Hours,
-} from '../db/models/usage';
+} from './db/models/usage';
 import { ObjectId } from 'mongodb';
-import { interpreter } from '../db/convo/interpreter';
+import { interpreter } from './db/convo/interpreter';
+import { sendMessage } from './gptTurboApi';
+import { handleSysConfig } from './db/convo/sysConfigHandler';
 
 export const msgRootDispatcher = async (
   bot: WechatyInterface,
@@ -78,8 +73,11 @@ export const msgRootDispatcher = async (
           (room?.id === process.env.BOT_ADMIN_ROOMID ||
             talkerid === process.env.BOT_ADMIN_WXID)
         ) {
-          await handleSysConfig(ssoid, contact, message, text);
-          return;
+          const ret = await handleSysConfig(ssoid.toHexString(), text);
+          if (ret != null) {
+            await message.say(ret);
+            return;
+          }
         }
 
         // count room usage
@@ -124,45 +122,6 @@ export const msgRootDispatcher = async (
   console.log(
     `[${new Date().toLocaleString()}] contact: ${contact}, text:${text}, room: ${room}`
   );
-
-  //   if (/(你|您)好$/gim.test(text) || /hello/gim.test(text)) {
-  //     message.say(
-  //       `欢迎来到人工智能时代！我是基于chatGPT的AI助手~
-  // 您可以输入:
-  // 开始|start: 进入对话
-  // 重置|reset: 重置对话(开始一段新对话)
-  // 退出|exit : 退出对话
-  // 祝您旅途愉快！
-  // `
-  //     );
-  //     return;
-  //   }
-  // if (/^(开始|start)/gim.test(text)) {
-  //   if (!gptUserList.includes(contact)) {
-  //     gptUserList.push(contact);
-  //     text = "你好";
-  //   }
-  // }
-  // if (/^(clear|退出|exit|quit)/gim.test(text)) {
-  //   await resetMessage(ssoid);
-  //   await message.say('退出成功！');
-  //   return;
-  // }
-  // if (/^(reset|重置)/gim.test(text)) {
-  //   await resetMessage(ssoid);
-  //   await message.say('重置对话成功！');
-  //   await asyncSleep(1 * 1e3);
-  //   await message.say('您可以输入新的内容了！');
-  //   return;
-  // }
-
-  if (text.indexOf('兑换订阅码') > -1) {
-    const code = extractSubscriptionCode(text);
-    if (code) {
-      await handleSubscriptionCode(ssoid, contact, message, code);
-      return;
-    }
-  }
 
   if (message.type() !== bot.Message.Type.Text) {
     console.log('message type is not text: ', message.type());

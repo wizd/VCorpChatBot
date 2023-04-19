@@ -8,7 +8,7 @@ import {
 import { getOrCreateUserByWeixinId } from './db/models/users';
 import { addVFriendship } from './db/friendship';
 
-import { msgRootDispatcher } from './handlers/messageDispatcher';
+import { msgRootDispatcher } from './messageDispatcher';
 import { getOrCreateSSOByWeixinId } from './db/models/sso';
 
 function onScan(qrcode: string, status: number) {
