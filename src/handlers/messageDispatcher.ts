@@ -175,7 +175,7 @@ export const msgRootDispatcher = async (
   if (/^(authcode|授权|授权码)/gim.test(text)) {
     const code = generateAuthCode();
     const authcode: VAuthCode = {
-      userId: ssoid,
+      ssoid: ssoid,
       reqFrom: 'weixin',
       time: new Date(),
       code: code,
