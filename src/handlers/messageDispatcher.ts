@@ -6,7 +6,7 @@ import {
 } from 'wechaty/impls';
 import { moneyTransferHandler } from './moneyTransferHandler';
 import { handleSysConfig } from './sysConfigHandler';
-import { handleSubscription } from './subscriptionHandler';
+import { handleSubscription } from '../db/convo/subscriptionHandler';
 import { messageManager, resetMessage, sendMessage } from '../gptTurboApi';
 import { generateAuthCode } from '../db/misc/helper';
 import { VAuthCode, addVAuthCode } from '../db/models/authcode';
@@ -82,24 +82,6 @@ export const msgRootDispatcher = async (
           return;
         }
 
-        if (text === '会员') {
-          await handleSubscription(ssoid, contact, message, text);
-          return;
-        }
-
-        if (/^(usage|额度|用量)/gim.test(text)) {
-          const humanUsage = await messageManager.getUsagePrint(ssoid, room.id);
-          console.log(humanUsage);
-          await message.say(`@${contact.payload?.name}\n${humanUsage}`);
-          return;
-        }
-        if (/^(authcode|授权|授权码)/gim.test(text)) {
-          await message.say(
-            `@${contact.payload?.name}\n\n无法在群内进行账号关联授权。请给我直接发消息，谢谢。`
-          );
-          return;
-        }
-
         // count room usage
         const rusage = await getTokensSumByWeixinRoomId(room.id);
         if (rusage.count >= 100) {
@@ -113,6 +95,12 @@ export const msgRootDispatcher = async (
           await message.say(
             '本群今天的免费使用额度（100轮对话）即将用完，如果想继续使用，请兑换订阅码或者成为会员。'
           );
+          return;
+        }
+
+        const output = await interpreter(ssoid.toHexString(), text, room.id);
+        if (output != null) {
+          await room.say(output, contact);
           return;
         }
 
@@ -196,11 +184,6 @@ export const msgRootDispatcher = async (
       await handleSubscriptionCode(ssoid, contact, message, code);
       return;
     }
-  }
-
-  if (text === '会员') {
-    await handleSubscription(ssoid, contact, message, text);
-    return;
   }
 
   if (message.type() !== bot.Message.Type.Text) {
