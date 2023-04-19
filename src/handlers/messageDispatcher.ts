@@ -18,6 +18,7 @@ import {
   getUsageCountForLast24Hours,
 } from '../db/models/usage';
 import { ObjectId } from 'mongodb';
+import { interpreter } from '../db/convo/interpreter';
 
 export const msgRootDispatcher = async (
   bot: WechatyInterface,
@@ -166,12 +167,7 @@ export const msgRootDispatcher = async (
     await message.say('您可以输入新的内容了！');
     return;
   }
-  if (/^(usage|额度|用量)/gim.test(text)) {
-    const humanUsage = await messageManager.getUsagePrint(ssoid);
-    console.log(humanUsage);
-    await message.say(humanUsage!);
-    return;
-  }
+
   if (/^(authcode|授权|授权码)/gim.test(text)) {
     const code = generateAuthCode();
     const authcode: VAuthCode = {
@@ -212,6 +208,12 @@ export const msgRootDispatcher = async (
     await message.say(
       '那是什么？我还没有学会处理其他类型的消息。还是请跟我用文字对话吧。'
     );
+    return;
+  }
+
+  const output = await interpreter(ssoid.toHexString(), text);
+  if (output != null) {
+    await message.say(output);
     return;
   }
 
