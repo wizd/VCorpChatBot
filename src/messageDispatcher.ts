@@ -15,6 +15,8 @@ import { interpreter } from './db/convo/interpreter';
 import { sendMessage } from './gptTurboApi';
 import { handleSysConfig } from './db/convo/sysConfigHandler';
 
+const adminCommands = /^(配置系统参数|配置折扣码)/;
+
 export const msgRootDispatcher = async (
   bot: WechatyInterface,
   botid: string,
@@ -69,7 +71,7 @@ export const msgRootDispatcher = async (
         const username = `${topic.toString()}-${contact.toString()}`;
 
         if (
-          text.startsWith('配置系统参数') &&
+          adminCommands.test(text) &&
           (room?.id === process.env.BOT_ADMIN_ROOMID ||
             talkerid === process.env.BOT_ADMIN_WXID)
         ) {
