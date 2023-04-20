@@ -161,16 +161,16 @@ export const msgRootDispatcher = async (
     console.log(
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`
     );
-    let reply = await sendMessage(text, ssoid);
-    if (/\[errored\]$/gim.test(reply)) {
-      reply = '遇到问题了，请稍后再试，或输入 重置 试试！';
-      console.log(reply);
-    }
-    if (/\[context_length_exceeded\]$/gim.test(reply)) {
-      reply =
-        '本轮会话长度太长啦，我记不住这么多东西，抱歉！请输入 重置 试试！';
-      console.log(reply);
-    }
+    const reply = await sendMessage(text, ssoid);
+    // if (/\[errored\]$/gim.test(reply)) {
+    //   reply = '遇到问题了，请稍后再试，或输入 重置 试试！';
+    //   console.log(reply);
+    // }
+    // if (/\[context_length_exceeded\]$/gim.test(reply)) {
+    //   reply =
+    //     '本轮会话长度太长啦，我记不住这么多东西，抱歉！请输入 重置 试试！';
+    //   console.log(reply);
+    // }
     await message.say(reply);
   }
 };
