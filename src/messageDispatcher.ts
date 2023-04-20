@@ -17,6 +17,8 @@ import { handleSysConfig } from './db/convo/sysConfigHandler';
 
 const adminCommands = /^(配置系统参数|配置折扣码)/;
 
+const bypassMsgTypes = [4, 13];
+
 export const msgRootDispatcher = async (
   bot: WechatyInterface,
   botid: string,

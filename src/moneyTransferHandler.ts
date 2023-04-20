@@ -88,6 +88,13 @@ export async function moneyTransferHandler(
         return;
       }
 
+      // check if the transfer has been processed
+      const processed = await getVSubCodeByTxId(transfer.transcationid);
+      if (processed !== null) {
+        console.log('This transfer has been processed');
+        return;
+      }
+
       // is ths transfer has been processed?
       if (
         transfer.transcationid === undefined ||
@@ -123,16 +130,25 @@ export async function moneyTransferHandler(
       if (couponCode !== null) {
         yearFee = couponCode.price;
 
+        console.log(
+          `coupon code found: ${couponCode.couponCode} and year fee become: ${yearFee} `
+        );
         // update coupon code to used
         couponCode.issuedCount = couponCode.issuedCount + 1;
         couponCode.time = new Date();
         await updateVCouponCode(couponCode);
+      } else {
+        console.log('coupon code not found: ', payMemo);
       }
 
       if (amount % yearFee === 0) {
         console.log('Amount is a strict multiple of yearFee.');
       } else {
-        console.log('Amount is not a strict multiple of yearFee.');
+        console.log(
+          `Amount ${amount} is not a strict multiple of yearFee: ${yearFee} and mod is: ${
+            amount % yearFee
+          }`
+        );
       }
 
       if (amount < yearFee) {
