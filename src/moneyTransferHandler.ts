@@ -17,6 +17,7 @@ import {
 } from './db/models/subcode';
 import { Message } from 'wechaty';
 import { ObjectId } from 'mongodb';
+import { getVCouponCode, updateVCouponCode } from './db/models/couponcode';
 
 async function parseWeChatTransferXml(
   message: string
@@ -113,9 +114,20 @@ export async function moneyTransferHandler(
       // get year fee
       console.log('getting year fee');
       const yearFeeStr = await getVCorpConfigByName('yearTextSubFee');
-      const yearFee = +yearFeeStr!.configValue;
+      let yearFee = +yearFeeStr!.configValue;
 
       const amount = parseMoney(transfer.des);
+      const payMemo = transfer.pay_memo;
+      // lookup coupon code from database
+      const couponCode = await getVCouponCode(payMemo);
+      if (couponCode !== null) {
+        yearFee = couponCode.price;
+
+        // update coupon code to used
+        couponCode.issuedCount = couponCode.issuedCount + 1;
+        couponCode.time = new Date();
+        await updateVCouponCode(couponCode);
+      }
 
       if (amount % yearFee === 0) {
         console.log('Amount is a strict multiple of yearFee.');

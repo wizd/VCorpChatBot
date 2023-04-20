@@ -48,8 +48,12 @@ export const msgRootDispatcher = async (
 
   let text = input;
   const talkerid = message.talker().id;
-  if (talkerid === 'weixin') {
-    console.log('message from weixin: ', message.text());
+  if (
+    talkerid === 'weixin' ||
+    contact.name() === '微信团队' ||
+    contact.name() === '微信支付'
+  ) {
+    console.log('ignore message from weixin: ', message.text());
     return;
   }
 
