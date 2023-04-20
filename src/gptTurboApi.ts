@@ -42,6 +42,7 @@ export const messageManager = (() => {
         prompt_tokens: usage.prompt_tokens,
         completion_tokens: usage.completion_tokens,
         total_tokens: usage.total_tokens,
+        catalog: 'text',
       });
     },
     getUsage: async (userId: ObjectId) => {
