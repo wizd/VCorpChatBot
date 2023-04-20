@@ -29,6 +29,33 @@ const chatWithGPT = async (messages: any[]) => {
   return answer;
 };
 
+const chatWithVCorp = async (
+  userid: string,
+  messages: any[],
+  roomid?: string
+) => {
+  const headers: Record<string, any> = {
+    Authorization: `Bearer ${process.env.OPEN_AI_KEY}`,
+  };
+  const data = {
+    version: 4,
+    veid: 'A0001',
+    vename: 'AI 助手',
+    nostream: true,
+    userid,
+    roomid,
+    messages,
+  };
+  const answer = await fetchApi(
+    process.env.VCORP_AI_URL || 'http://192.168.3.59:4004/vc/v1/chat',
+    'POST',
+    { headers, timeout: 60000 },
+    data
+  );
+  console.log('answer from vcorp: ', answer);
+  return answer;
+};
+
 export const messageManager = (() => {
   return {
     addUsage: async (usage: any, userId: ObjectId, roomWeixinId?: string) => {
@@ -153,7 +180,11 @@ export async function sendMessage(
     console.log('-----------newMessages----------');
     console.log(messages);
     console.log('-----------newMessages----------');
-    const completion = await chatWithGPT(messages);
+    const completion = await chatWithVCorp(
+      userId.toHexString(),
+      messages,
+      roomWeixinId
+    );
     const answer = completion.choices[0].message.content;
 
     console.log('-----------newAnswers----------');
