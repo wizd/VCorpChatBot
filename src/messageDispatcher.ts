@@ -97,12 +97,12 @@ export const msgRootDispatcher = async (
           return;
         }
 
-        if (rusage.count >= 60) {
-          await message.say(
-            '本群今天的免费使用额度（100轮对话）即将用完，如果想继续使用，请兑换订阅码或者成为会员。'
-          );
-          return;
-        }
+        // if (rusage.count >= 60) {
+        //   await message.say(
+        //     '本群今天的免费使用额度（100轮对话）即将用完，如果想继续使用，请兑换订阅码或者成为会员。'
+        //   );
+        //   return;
+        // }
 
         const output = await interpreter(ssoid.toHexString(), text, room.id);
         if (output != null) {
@@ -150,9 +150,9 @@ export const msgRootDispatcher = async (
     const subscribed = await isUserSubscribed(ssoid);
     if (!subscribed) {
       const count = await getUsageCountForLast24Hours(ssoid);
-      if (count >= 5) {
+      if (count >= 20) {
         await message.say(
-          '您今天的免费使用额度已经用完了，如果想继续使用，请兑换订阅码或者成为会员。'
+          '您今天的免费使用额度已经用完了，如果想继续使用，请兑换订阅码或者成为会员。如需详细信息，请输入:\n\n帮助'
         );
         return;
       }
