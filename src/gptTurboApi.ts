@@ -30,6 +30,7 @@ const chatWithGPT = async (messages: any[]) => {
 };
 
 const chatWithVCorp = async (
+  agentid: string,
   userid: string,
   messages: any[],
   roomid?: string
@@ -39,15 +40,17 @@ const chatWithVCorp = async (
   };
   const data = {
     version: 4,
-    veid: 'A0001',
+    veid: 'B0001',
     vename: 'AI 助手',
     nostream: true,
+    agentid,
     userid,
     roomid,
+    app: 'weixin',
     messages,
   };
   const answer = await fetchApi(
-    process.env.VCORP_AI_URL || 'http://192.168.3.59:4004/vc/v1/chat',
+    process.env.VCORP_AI_URL || 'http://192.168.3.59:3001/vc/v1/chat',
     'POST',
     { headers, timeout: 60000 },
     data
@@ -170,6 +173,7 @@ export async function resetMessage(userId: ObjectId) {
   await messageManager.clearMessage(userId);
 }
 export async function sendMessage(
+  agentid: string,
   message: string,
   userId: ObjectId,
   roomWeixinId?: string
@@ -181,6 +185,7 @@ export async function sendMessage(
     console.log(messages);
     console.log('-----------newMessages----------');
     const completion = await chatWithVCorp(
+      agentid,
       userId.toHexString(),
       messages,
       roomWeixinId
@@ -191,7 +196,7 @@ export async function sendMessage(
     console.log(answer);
     console.log('-----------newAnswers----------');
     await messageManager.addAIMessage(answer, userId);
-    messageManager.addUsage(completion.usage, userId, roomWeixinId);
+    //messageManager.addUsage(completion.usage, userId, roomWeixinId);
     return answer;
   } catch (err) {
     console.log((err as Error).message);

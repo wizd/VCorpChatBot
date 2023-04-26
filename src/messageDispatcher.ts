@@ -76,17 +76,17 @@ export const msgRootDispatcher = async (
         console.log('user real text is: ', text);
         const username = `${topic.toString()}-${contact.toString()}`;
 
-        if (
-          adminCommands.test(text) &&
-          (room?.id === process.env.BOT_ADMIN_ROOMID ||
-            talkerid === process.env.BOT_ADMIN_WXID)
-        ) {
-          const ret = await handleSysConfig(ssoid.toHexString(), text);
-          if (ret != null) {
-            await message.say(ret);
-            return;
-          }
-        }
+        // if (
+        //   adminCommands.test(text) &&
+        //   (room?.id === process.env.BOT_ADMIN_ROOMID ||
+        //     talkerid === process.env.BOT_ADMIN_WXID)
+        // ) {
+        //   const ret = await handleSysConfig(ssoid.toHexString(), text);
+        //   if (ret != null) {
+        //     await message.say(ret);
+        //     return;
+        //   }
+        // }
 
         // count room usage
         const rusage = await getTokensSumByWeixinRoomId(room.id);
@@ -104,19 +104,19 @@ export const msgRootDispatcher = async (
         //   return;
         // }
 
-        const output = await interpreter(ssoid.toHexString(), text, room.id);
-        if (output != null) {
-          await room.say(output, contact);
-          return;
-        }
+        // const output = await interpreter(ssoid.toHexString(), text, room.id);
+        // if (output != null) {
+        //   await room.say(output, contact);
+        //   return;
+        // }
 
-        let reply = await sendMessage(text, ssoid, room.id);
-        if (/\[errored\]$/gim.test(reply)) {
-          reply = '遇到问题了，请稍后再试！';
-        }
-        if (/\[context_length_exceeded\]$/gim.test(reply)) {
-          reply = '本轮会话长度太长啦，我记不住这么多东西，请重试！';
-        }
+        let reply = await sendMessage(botid, text, ssoid, room.id);
+        // if (/\[errored\]$/gim.test(reply)) {
+        //   reply = '遇到问题了，请稍后再试！';
+        // }
+        // if (/\[context_length_exceeded\]$/gim.test(reply)) {
+        //   reply = '本轮会话长度太长啦，我记不住这么多东西，请重试！';
+        // }
         console.log(reply);
         room.say(reply, contact);
       }
@@ -139,29 +139,29 @@ export const msgRootDispatcher = async (
     return;
   }
 
-  const output = await interpreter(ssoid.toHexString(), text);
-  if (output != null) {
-    await message.say(output);
-    return;
-  }
+  // const output = await interpreter(ssoid.toHexString(), text);
+  // if (output != null) {
+  //   await message.say(output);
+  //   return;
+  // }
 
   if (text) {
     // check if free use is out
-    const subscribed = await isUserSubscribed(ssoid);
-    if (!subscribed) {
-      const count = await getUsageCountForLast24Hours(ssoid);
-      if (count >= 20) {
-        await message.say(
-          '您今天的免费使用额度已经用完了，如果想继续使用，请兑换订阅码或者成为会员。如需详细信息，请输入:\n\n帮助'
-        );
-        return;
-      }
-    }
+    // const subscribed = await isUserSubscribed(ssoid);
+    // if (!subscribed) {
+    //   const count = await getUsageCountForLast24Hours(ssoid);
+    //   if (count >= 20) {
+    //     await message.say(
+    //       '您今天的免费使用额度已经用完了，如果想继续使用，请兑换订阅码或者成为会员。如需详细信息，请输入:\n\n帮助'
+    //     );
+    //     return;
+    //   }
+    // }
 
     console.log(
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`
     );
-    const reply = await sendMessage(text, ssoid);
+    const reply = await sendMessage(botid, text, ssoid);
     // if (/\[errored\]$/gim.test(reply)) {
     //   reply = '遇到问题了，请稍后再试，或输入 重置 试试！';
     //   console.log(reply);
