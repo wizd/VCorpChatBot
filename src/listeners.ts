@@ -77,9 +77,9 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
     const talkerid = message.talker().id;
     console.log('talkerid is: ', talkerid);
     const ssoid = await getOrCreateSSOByWeixinId(talkerid, botid);
-    const vcuser = await getOrCreateUserByWeixinId(talkerid);
-    if (ssoid === null || vcuser === null || vcuser._id === undefined) {
-      console.log('Fatal error!!!!! vcuser is null for talkerid: ', talkerid);
+    //const vcuser = await getOrCreateUserByWeixinId(talkerid);
+    if (ssoid === null) {
+      console.log('Fatal error!!!!! ssoid is null for talkerid: ', talkerid);
       return;
     }
 
