@@ -176,6 +176,7 @@ export async function sendMessage(
   agentid: string,
   message: string,
   userId: ObjectId,
+  talkerid: string,
   roomWeixinId?: string
 ) {
   try {
@@ -186,7 +187,7 @@ export async function sendMessage(
     console.log('-----------newMessages----------');
     const completion = await chatWithVCorp(
       agentid,
-      userId.toHexString(),
+      talkerid,
       messages,
       roomWeixinId
     );

@@ -110,7 +110,7 @@ export const msgRootDispatcher = async (
         //   return;
         // }
 
-        let reply = await sendMessage(botid, text, ssoid, room.id);
+        const reply = await sendMessage(botid, text, ssoid, talkerid, room.id);
         // if (/\[errored\]$/gim.test(reply)) {
         //   reply = '遇到问题了，请稍后再试！';
         // }
@@ -161,7 +161,7 @@ export const msgRootDispatcher = async (
     console.log(
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`
     );
-    const reply = await sendMessage(botid, text, ssoid);
+    const reply = await sendMessage(botid, text, ssoid, talkerid);
     // if (/\[errored\]$/gim.test(reply)) {
     //   reply = '遇到问题了，请稍后再试，或输入 重置 试试！';
     //   console.log(reply);
