@@ -61,10 +61,11 @@ export const msgRootDispatcher = async (
 
   if (room) {
     try {
+      let adminOnly = false;
       const idcount = await room.memberAll();
       if (idcount.length < 50 && room?.id !== process.env.BOT_ADMIN_ROOMID) {
         console.log('room member count is less than 50, ignore message');
-        return;
+        adminOnly = true;
       }
 
       const topic = await room.topic();
@@ -116,7 +117,14 @@ export const msgRootDispatcher = async (
         //   return;
         // }
 
-        const reply = await sendMessage(botid, text, ssoid, talkerid, room.id);
+        const reply = await sendMessage(
+          botid,
+          text,
+          ssoid,
+          talkerid,
+          room.id,
+          adminOnly
+        );
         // if (/\[errored\]$/gim.test(reply)) {
         //   reply = '遇到问题了，请稍后再试！';
         // }

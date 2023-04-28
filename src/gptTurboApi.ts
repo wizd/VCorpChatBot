@@ -33,7 +33,8 @@ const chatWithVCorp = async (
   agentid: string,
   userid: string,
   messages: any[],
-  roomid?: string
+  roomid?: string,
+  adminOnly?: boolean
 ) => {
   const headers: Record<string, any> = {
     Authorization: `Bearer ${process.env.OPEN_AI_KEY}`,
@@ -47,6 +48,7 @@ const chatWithVCorp = async (
     userid,
     roomid,
     app: 'weixin',
+    adminOnly,
     messages,
   };
   const answer = await fetchApi(
@@ -177,7 +179,8 @@ export async function sendMessage(
   message: string,
   userId: ObjectId,
   talkerid: string,
-  roomWeixinId?: string
+  roomWeixinId?: string,
+  adminOnly?: boolean // tell humine only reply if admin.
 ) {
   try {
     await messageManager.addUserMessage(message, userId);
@@ -189,7 +192,8 @@ export async function sendMessage(
       agentid,
       talkerid,
       messages,
-      roomWeixinId
+      roomWeixinId,
+      adminOnly
     );
     const answer = completion.choices[0].message.content;
 
