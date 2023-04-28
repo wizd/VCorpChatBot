@@ -10,6 +10,17 @@ import { addVFriendship } from './db/friendship';
 
 import { msgRootDispatcher } from './messageDispatcher';
 import { getOrCreateSSOByWeixinId } from './db/models/sso';
+import { Message } from 'wechaty';
+import { getVCorpConfigByName } from './db/models/sysconfig';
+
+const sendMessage = async (
+  bot: WechatyInterface,
+  contact: ContactInterface,
+  payload: any
+): Promise<Message> => {
+  const message = (await contact.say(payload)) as Message;
+  return message;
+};
 
 function onScan(qrcode: string, status: number) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -46,6 +57,14 @@ async function onFriendship(
         break;
       case bot.Friendship.Type.Confirm:
         console.log(`friend ship confirmed`);
+        // say welcome
+        try {
+          const contact = friendship.contact();
+          const msg = getVCorpConfigByName('welcomeText');
+          await sendMessage(bot, contact, msg);
+        } catch (err) {
+          console.log('error say hello to new friend: ', err);
+        }
         break;
     }
   } catch (e) {

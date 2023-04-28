@@ -62,7 +62,7 @@ export const msgRootDispatcher = async (
   if (room) {
     try {
       const idcount = await room.memberAll();
-      if (idcount.length < 50) {
+      if (idcount.length < 50 && room?.id !== process.env.BOT_ADMIN_ROOMID) {
         console.log('room member count is less than 50, ignore message');
         return;
       }
