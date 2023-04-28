@@ -1,6 +1,6 @@
 import { fetchApi } from './utils';
 
-const chatWithVCorp = async (
+export const chatWithVCorp = async (
   agentid: string,
   userid: string,
   message: string,
@@ -29,7 +29,8 @@ const chatWithVCorp = async (
     data
   );
   console.log('answer from vcorp: ', answer);
-  return answer;
+  const output = answer.choices[0].message.content;
+  return output;
 };
 
 export const wxTransWithVCorp = async (
@@ -59,44 +60,3 @@ export const wxTransWithVCorp = async (
   console.log('answer from vcorp: ', answer);
   return answer;
 };
-
-export async function sendMessage(
-  agentid: string,
-  message: string,
-  talkerid: string,
-  roomWeixinId?: string,
-  adminOnly?: boolean // tell humine only reply if admin.
-) {
-  try {
-    console.log('-----------newMessages----------');
-    console.log(message);
-    console.log('-----------newMessages----------');
-    const completion = await chatWithVCorp(
-      agentid,
-      talkerid,
-      message,
-      roomWeixinId,
-      adminOnly
-    );
-    const answer = completion.choices[0].message.content;
-
-    console.log('-----------newAnswers----------');
-    console.log(answer);
-    console.log('-----------newAnswers----------');
-    return answer;
-  } catch (err) {
-    console.log((err as Error).message);
-    let errorBody = (err as Error & { response: any })?.response?.data;
-    console.log(errorBody);
-    let append = '[errored]';
-    try {
-      if (errorBody.error.code === 'context_length_exceeded') {
-        append = '[errored][context_length_exceeded]';
-      }
-      errorBody = JSON.stringify(errorBody);
-    } catch (_) {
-      /* empty */
-    }
-    return (err as Error).message + '   ' + errorBody + '[errored]';
-  }
-}

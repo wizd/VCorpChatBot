@@ -4,7 +4,7 @@ import {
   RoomInterface,
   WechatyInterface,
 } from 'wechaty/impls';
-import { sendMessage, wxTransWithVCorp } from './gptTurboApi';
+import { chatWithVCorp, wxTransWithVCorp } from './chatServer';
 
 const bypassMsgTypes = [4, 13];
 
@@ -77,10 +77,10 @@ export const msgRootDispatcher = async (
         console.log('user real text is: ', text);
         const username = `${topic.toString()}-${contact.toString()}`;
 
-        const reply = await sendMessage(
+        const reply = await chatWithVCorp(
           botid,
-          text,
           talkerid,
+          text,
           room.id,
           adminOnly
         );
@@ -112,7 +112,7 @@ export const msgRootDispatcher = async (
     console.log(
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`
     );
-    const reply = await sendMessage(botid, text, talkerid);
+    const reply = await chatWithVCorp(botid, talkerid, text);
     await message.say(reply);
   }
 };
