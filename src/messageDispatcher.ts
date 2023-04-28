@@ -89,13 +89,13 @@ export const msgRootDispatcher = async (
         // }
 
         // count room usage
-        const rusage = await getTokensSumByWeixinRoomId(room.id);
-        if (rusage.count >= 100) {
-          await message.say(
-            '本群今天的免费使用额度（100轮对话）已经用完了，如果想继续使用，请兑换订阅码或者成为会员。'
-          );
-          return;
-        }
+        // const rusage = await getTokensSumByWeixinRoomId(room.id);
+        // if (rusage.count >= 100) {
+        //   await message.say(
+        //     '本群今天的免费使用额度（100轮对话）已经用完了，如果想继续使用，请兑换订阅码或者成为会员。'
+        //   );
+        //   return;
+        // }
 
         // if (rusage.count >= 60) {
         //   await message.say(
