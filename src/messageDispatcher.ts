@@ -4,7 +4,6 @@ import {
   RoomInterface,
   WechatyInterface,
 } from 'wechaty/impls';
-import { moneyTransferHandler } from './moneyTransferHandler';
 import { isUserSubscribed } from './db/models/vsubscription';
 import {
   getTokensSumByWeixinRoomId,
@@ -12,7 +11,7 @@ import {
 } from './db/models/usage';
 import { ObjectId } from 'mongodb';
 import { interpreter } from './db/convo/interpreter';
-import { sendMessage } from './gptTurboApi';
+import { sendMessage, wxTransWithVCorp } from './gptTurboApi';
 import { handleSysConfig } from './db/convo/sysConfigHandler';
 
 const adminCommands = /^(配置系统参数|配置折扣码)/;
@@ -36,11 +35,6 @@ export const msgRootDispatcher = async (
     //return;
   }
 
-  if (message.type() === 11) {
-    await moneyTransferHandler(ssoid, message, input, contact, room, botid);
-    return;
-  }
-
   if (message.type() === 13) {
     // notify from weixin that you have a pending transfer
     return;
@@ -56,6 +50,13 @@ export const msgRootDispatcher = async (
     contact.name() === '微信支付'
   ) {
     console.log('ignore message from weixin: ', message.text());
+    return;
+  }
+
+  if (message.type() === 11) {
+    const reply = await wxTransWithVCorp(botid, talkerid, text, room?.id);
+    //await moneyTransferHandler(ssoid, message, input, contact, room, botid);
+    await message.say(reply);
     return;
   }
 

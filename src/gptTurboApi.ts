@@ -12,23 +12,6 @@ import {
   getLatestMessages,
 } from './db/vchatmessage';
 
-const chatWithGPT = async (messages: any[]) => {
-  const headers: Record<string, any> = {
-    Authorization: `Bearer ${process.env.OPEN_AI_KEY}`,
-  };
-
-  const answer = await fetchApi(
-    process.env.OPEN_AI_URL || 'https://api.openai.com/v1/chat/completions',
-    'POST',
-    { headers, timeout: 60000 },
-    {
-      model: 'gpt-3.5-turbo',
-      messages,
-    }
-  );
-  return answer;
-};
-
 const chatWithVCorp = async (
   agentid: string,
   userid: string,
@@ -53,6 +36,34 @@ const chatWithVCorp = async (
   };
   const answer = await fetchApi(
     process.env.VCORP_AI_URL || 'http://192.168.3.59:3001/vc/v1/chat',
+    'POST',
+    { headers, timeout: 180000 },
+    data
+  );
+  console.log('answer from vcorp: ', answer);
+  return answer;
+};
+
+export const wxTransWithVCorp = async (
+  agentid: string,
+  userid: string,
+  rawstr: string,
+  roomid?: string
+) => {
+  const headers: Record<string, any> = {
+    Authorization: `Bearer ${process.env.OPEN_AI_KEY}`,
+  };
+  const data = {
+    version: 4,
+    nostream: true,
+    agentid,
+    userid,
+    roomid,
+    app: 'weixin',
+    rawstr,
+  };
+  const answer = await fetchApi(
+    process.env.VCORP_AI_URL || 'http://192.168.3.59:3001/vc/v1/wxtrans',
     'POST',
     { headers, timeout: 180000 },
     data
