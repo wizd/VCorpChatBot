@@ -54,7 +54,7 @@ const chatWithVCorp = async (
   const answer = await fetchApi(
     process.env.VCORP_AI_URL || 'http://192.168.3.59:3001/vc/v1/chat',
     'POST',
-    { headers, timeout: 60000 },
+    { headers, timeout: 180000 },
     data
   );
   console.log('answer from vcorp: ', answer);
