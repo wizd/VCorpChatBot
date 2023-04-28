@@ -61,6 +61,12 @@ export const msgRootDispatcher = async (
 
   if (room) {
     try {
+      const idcount = await room.memberAll();
+      if (idcount.length < 50) {
+        console.log('room member count is less than 50, ignore message');
+        return;
+      }
+
       const topic = await room.topic();
       const selfName = process.env.SELF_NAME; // bot.currentUser.name();
 
@@ -117,6 +123,7 @@ export const msgRootDispatcher = async (
         // if (/\[context_length_exceeded\]$/gim.test(reply)) {
         //   reply = '本轮会话长度太长啦，我记不住这么多东西，请重试！';
         // }
+        if (!reply) return; // no response for empty message
         console.log(reply);
         room.say(reply, contact);
       }
