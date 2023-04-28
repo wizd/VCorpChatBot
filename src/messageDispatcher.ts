@@ -62,7 +62,7 @@ export const msgRootDispatcher = async (
   if (room) {
     try {
       const topic = await room.topic();
-      const selfName = bot.currentUser.name();
+      const selfName = process.env.SELF_NAME; // bot.currentUser.name();
 
       // check if talk to me
       //const talkTos = await message.mentionList()
