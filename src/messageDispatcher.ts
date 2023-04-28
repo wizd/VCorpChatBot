@@ -62,7 +62,7 @@ export const msgRootDispatcher = async (
   if (room) {
     try {
       const topic = await room.topic();
-      const selfName = '晓玲珑 - AI 来了'; //bot.currentUser.name();
+      const selfName = bot.currentUser.name();
 
       // check if talk to me
       //const talkTos = await message.mentionList()
