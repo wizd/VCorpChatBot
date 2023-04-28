@@ -5,13 +5,8 @@ import {
   MessageInterface,
   WechatyInterface,
 } from 'wechaty/impls';
-import { getOrCreateUserByWeixinId } from './db/models/users';
-import { addVFriendship } from './db/friendship';
-
 import { msgRootDispatcher } from './messageDispatcher';
-import { getOrCreateSSOByWeixinId } from './db/models/sso';
 import { Message } from 'wechaty';
-import { getVCorpConfigByName } from './db/models/sysconfig';
 
 const sendMessage = async (
   bot: WechatyInterface,
@@ -50,21 +45,21 @@ async function onFriendship(
     switch (friendship.type()) {
       case bot.Friendship.Type.Receive:
         await friendship.accept();
-        await addVFriendship({
-          name: friendship.contact().name(),
-          time: new Date(),
-        });
+        // await addVFriendship({
+        //   name: friendship.contact().name(),
+        //   time: new Date(),
+        // });
         break;
       case bot.Friendship.Type.Confirm:
         console.log(`friend ship confirmed`);
         // say welcome
-        try {
-          const contact = friendship.contact();
-          const msg = getVCorpConfigByName('welcomeText');
-          await sendMessage(bot, contact, msg);
-        } catch (err) {
-          console.log('error say hello to new friend: ', err);
-        }
+        // try {
+        //   const contact = friendship.contact();
+        //   const msg = getVCorpConfigByName('welcomeText');
+        //   await sendMessage(bot, contact, msg);
+        // } catch (err) {
+        //   console.log('error say hello to new friend: ', err);
+        // }
         break;
     }
   } catch (e) {
@@ -95,14 +90,14 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
     // get talkerid
     const talkerid = message.talker().id;
     console.log('talkerid is: ', talkerid);
-    const ssoid = await getOrCreateSSOByWeixinId(talkerid, botid);
-    //const vcuser = await getOrCreateUserByWeixinId(talkerid);
-    if (ssoid === null) {
-      console.log('Fatal error!!!!! ssoid is null for talkerid: ', talkerid);
-      return;
-    }
+    // const ssoid = await getOrCreateSSOByWeixinId(talkerid, botid);
+    // //const vcuser = await getOrCreateUserByWeixinId(talkerid);
+    // if (ssoid === null) {
+    //   console.log('Fatal error!!!!! ssoid is null for talkerid: ', talkerid);
+    //   return;
+    // }
 
-    await msgRootDispatcher(bot, botid, message, contact, room, ssoid._id!);
+    await msgRootDispatcher(bot, botid, message, contact, room);
   } catch (err) {
     console.log('Fatal error!!!!! vcuser is null for talkerid: ', err);
     return;

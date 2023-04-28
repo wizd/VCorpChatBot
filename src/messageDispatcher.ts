@@ -4,17 +4,7 @@ import {
   RoomInterface,
   WechatyInterface,
 } from 'wechaty/impls';
-import { isUserSubscribed } from './db/models/vsubscription';
-import {
-  getTokensSumByWeixinRoomId,
-  getUsageCountForLast24Hours,
-} from './db/models/usage';
-import { ObjectId } from 'mongodb';
-import { interpreter } from './db/convo/interpreter';
 import { sendMessage, wxTransWithVCorp } from './gptTurboApi';
-import { handleSysConfig } from './db/convo/sysConfigHandler';
-
-const adminCommands = /^(配置系统参数|配置折扣码)/;
 
 const bypassMsgTypes = [4, 13];
 
@@ -23,8 +13,7 @@ export const msgRootDispatcher = async (
   botid: string,
   message: MessageInterface,
   contact: ContactInterface,
-  room: RoomInterface | undefined,
-  ssoid: ObjectId
+  room: RoomInterface | undefined
 ) => {
   // process special messages
   // transfer message, type === 11
@@ -125,7 +114,6 @@ export const msgRootDispatcher = async (
         const reply = await sendMessage(
           botid,
           text,
-          ssoid,
           talkerid,
           room.id,
           adminOnly
@@ -181,7 +169,7 @@ export const msgRootDispatcher = async (
     console.log(
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`
     );
-    const reply = await sendMessage(botid, text, ssoid, talkerid);
+    const reply = await sendMessage(botid, text, talkerid);
     // if (/\[errored\]$/gim.test(reply)) {
     //   reply = '遇到问题了，请稍后再试，或输入 重置 试试！';
     //   console.log(reply);

@@ -1,21 +1,9 @@
-import { ObjectId } from 'mongodb';
 import { fetchApi } from './utils';
-import {
-  addUsage,
-  getTokensSumByUserId,
-  getTokensSumByWeixinRoomId,
-  getTotalUsage,
-} from './db/models/usage';
-import {
-  addVChatMessage,
-  deleteAllMessagesByUserId,
-  getLatestMessages,
-} from './db/vchatmessage';
 
 const chatWithVCorp = async (
   agentid: string,
   userid: string,
-  messages: any[],
+  message: string,
   roomid?: string,
   adminOnly?: boolean
 ) => {
@@ -32,7 +20,7 @@ const chatWithVCorp = async (
     roomid,
     app: 'weixin',
     adminOnly,
-    messages,
+    messages: [{ role: 'user', content: message }],
   };
   const answer = await fetchApi(
     process.env.VCORP_AI_URL + '/chat',
@@ -72,137 +60,21 @@ export const wxTransWithVCorp = async (
   return answer;
 };
 
-export const messageManager = (() => {
-  return {
-    addUsage: async (usage: any, userId: ObjectId, roomWeixinId?: string) => {
-      // {prompt_tokens: 10, completion_tokens: 17, total_tokens: 27}
-      console.log('add usage for userId: ', userId);
-      console.log('add usage: ', usage);
-      await addUsage({
-        userId,
-        roomWeixinId,
-        time: new Date(),
-        prompt_tokens: usage.prompt_tokens,
-        completion_tokens: usage.completion_tokens,
-        total_tokens: usage.total_tokens,
-        catalog: 'text',
-      });
-    },
-    getUsage: async (userId: ObjectId) => {
-      return await getTotalUsage(userId);
-    },
-    getUsagePrint: async (userId: ObjectId, roomWeixinId?: string) => {
-      console.log(`getting usage for ${userId}...`);
-
-      let ret = '';
-      const printUsage = (owner: string, usage: any) => {
-        if (usage) {
-          for (const prop in usage) {
-            switch (prop) {
-              case 'prompt_sum':
-                ret += `${owner}输入：${usage.prompt_sum}\n`;
-                break;
-              case 'completion_sum':
-                ret += `${owner}回答：${usage.completion_sum}\n`;
-                break;
-              case 'total_sum':
-                ret += `共计：${usage.total_sum}\n`;
-                break;
-              case 'count':
-                ret += `次数：${usage.count}\n`;
-                break;
-            }
-          }
-        }
-        ret += '\n';
-      };
-      const usage = await getTokensSumByUserId(userId);
-      printUsage('我的', usage);
-      if (roomWeixinId) {
-        const roomUsage = await getTokensSumByWeixinRoomId(roomWeixinId);
-        printUsage('群', roomUsage);
-      }
-
-      console.log(`usage for ${userId} print: `, ret);
-      return ret;
-    },
-
-    addUserMessage: async (message: string, userId: ObjectId) => {
-      await addVChatMessage({
-        userId,
-        isFromAI: false,
-        message,
-        type: 0,
-        time: new Date(),
-      });
-    },
-
-    addAIMessage: async (message: string, userId: ObjectId) => {
-      await addVChatMessage({
-        userId,
-        isFromAI: true,
-        message,
-        type: 0,
-        time: new Date(),
-      });
-    },
-
-    // sendMessage: (content: string, user: string) => {
-    //   if (!messageMap[user]) {
-    //     messageMap[user] = [];
-    //   }
-    //   messageMap[user].push({ role: "user", content });
-    // },
-    // concatAnswer: (content: string, user: string) => {
-    //   if (!messageMap[user]) {
-    //     messageMap[user] = [];
-    //   }
-    //   messageMap[user].push({ role: "assistant", content });
-    // },
-    getMessages: async (userId: ObjectId) => {
-      const messages = await getLatestMessages(userId);
-      console.log('getLatestMessages: ', messages);
-      return messages.map((message) => {
-        const role = message.isFromAI ? 'assistant' : 'user';
-        return {
-          role,
-          content: message.message,
-        };
-      });
-    },
-    // shiftMessage: (user: string) => {
-    //   messageMap[user].shift();
-    // },
-    // popMessage: (user: string) => {
-    //   messageMap[user].pop();
-    // },
-    clearMessage: async (userId: ObjectId) => {
-      await deleteAllMessagesByUserId(userId);
-    },
-  };
-})();
-
-export async function resetMessage(userId: ObjectId) {
-  await messageManager.clearMessage(userId);
-}
 export async function sendMessage(
   agentid: string,
   message: string,
-  userId: ObjectId,
   talkerid: string,
   roomWeixinId?: string,
   adminOnly?: boolean // tell humine only reply if admin.
 ) {
   try {
-    await messageManager.addUserMessage(message, userId);
-    const messages = await messageManager.getMessages(userId);
     console.log('-----------newMessages----------');
-    console.log(messages);
+    console.log(message);
     console.log('-----------newMessages----------');
     const completion = await chatWithVCorp(
       agentid,
       talkerid,
-      messages,
+      message,
       roomWeixinId,
       adminOnly
     );
@@ -211,8 +83,6 @@ export async function sendMessage(
     console.log('-----------newAnswers----------');
     console.log(answer);
     console.log('-----------newAnswers----------');
-    await messageManager.addAIMessage(answer, userId);
-    //messageManager.addUsage(completion.usage, userId, roomWeixinId);
     return answer;
   } catch (err) {
     console.log((err as Error).message);
