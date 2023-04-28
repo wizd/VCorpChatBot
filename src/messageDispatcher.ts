@@ -46,7 +46,11 @@ export const msgRootDispatcher = async (
     const reply = await wxTransWithVCorp(botid, talkerid, text, room?.id);
     //await moneyTransferHandler(ssoid, message, input, contact, room, botid);
     if (reply.status === 'success') {
-      await message.say(reply.messages[0].content);
+      if (reply.messages[0].content !== '') {
+        await message.say(reply.messages[0].content);
+      } else {
+        // do nothing
+      }
     } else {
       await message.say('转账处理失败，请联系客服（输入‘帮助’有详情）。');
     }
@@ -65,10 +69,6 @@ export const msgRootDispatcher = async (
       const topic = await room.topic();
       const selfName = process.env.SELF_NAME; // bot.currentUser.name();
 
-      // check if talk to me
-      //const talkTos = await message.mentionList()
-      //console.log("talkTos is: ", talkTos);
-      //if(talkTos.includes(bot.currentUser.id)) return;
       console.log(`room topic is : ${topic}, ${text}`);
       if (text.indexOf(`@${selfName}`) !== -1) {
         text = text.replace(`@${selfName}`, '').trim();
@@ -77,40 +77,6 @@ export const msgRootDispatcher = async (
         console.log('user real text is: ', text);
         const username = `${topic.toString()}-${contact.toString()}`;
 
-        // if (
-        //   adminCommands.test(text) &&
-        //   (room?.id === process.env.BOT_ADMIN_ROOMID ||
-        //     talkerid === process.env.BOT_ADMIN_WXID)
-        // ) {
-        //   const ret = await handleSysConfig(ssoid.toHexString(), text);
-        //   if (ret != null) {
-        //     await message.say(ret);
-        //     return;
-        //   }
-        // }
-
-        // count room usage
-        // const rusage = await getTokensSumByWeixinRoomId(room.id);
-        // if (rusage.count >= 100) {
-        //   await message.say(
-        //     '本群今天的免费使用额度（100轮对话）已经用完了，如果想继续使用，请兑换订阅码或者成为会员。'
-        //   );
-        //   return;
-        // }
-
-        // if (rusage.count >= 60) {
-        //   await message.say(
-        //     '本群今天的免费使用额度（100轮对话）即将用完，如果想继续使用，请兑换订阅码或者成为会员。'
-        //   );
-        //   return;
-        // }
-
-        // const output = await interpreter(ssoid.toHexString(), text, room.id);
-        // if (output != null) {
-        //   await room.say(output, contact);
-        //   return;
-        // }
-
         const reply = await sendMessage(
           botid,
           text,
@@ -118,12 +84,7 @@ export const msgRootDispatcher = async (
           room.id,
           adminOnly
         );
-        // if (/\[errored\]$/gim.test(reply)) {
-        //   reply = '遇到问题了，请稍后再试！';
-        // }
-        // if (/\[context_length_exceeded\]$/gim.test(reply)) {
-        //   reply = '本轮会话长度太长啦，我记不住这么多东西，请重试！';
-        // }
+
         if (!reply) return; // no response for empty message
         console.log(reply);
         room.say(reply, contact);
@@ -147,38 +108,11 @@ export const msgRootDispatcher = async (
     return;
   }
 
-  // const output = await interpreter(ssoid.toHexString(), text);
-  // if (output != null) {
-  //   await message.say(output);
-  //   return;
-  // }
-
   if (text) {
-    // check if free use is out
-    // const subscribed = await isUserSubscribed(ssoid);
-    // if (!subscribed) {
-    //   const count = await getUsageCountForLast24Hours(ssoid);
-    //   if (count >= 20) {
-    //     await message.say(
-    //       '您今天的免费使用额度已经用完了，如果想继续使用，请兑换订阅码或者成为会员。如需详细信息，请输入:\n\n帮助'
-    //     );
-    //     return;
-    //   }
-    // }
-
     console.log(
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`
     );
     const reply = await sendMessage(botid, text, talkerid);
-    // if (/\[errored\]$/gim.test(reply)) {
-    //   reply = '遇到问题了，请稍后再试，或输入 重置 试试！';
-    //   console.log(reply);
-    // }
-    // if (/\[context_length_exceeded\]$/gim.test(reply)) {
-    //   reply =
-    //     '本轮会话长度太长啦，我记不住这么多东西，抱歉！请输入 重置 试试！';
-    //   console.log(reply);
-    // }
     await message.say(reply);
   }
 };

@@ -8,7 +8,7 @@ const chatWithVCorp = async (
   adminOnly?: boolean
 ) => {
   const headers: Record<string, any> = {
-    Authorization: `Bearer ${process.env.OPEN_AI_KEY}`,
+    Authorization: `Bearer ${process.env.VCORP_AI_KEY}`,
   };
   const data = {
     version: 4,
@@ -39,7 +39,7 @@ export const wxTransWithVCorp = async (
   roomid?: string
 ) => {
   const headers: Record<string, any> = {
-    Authorization: `Bearer ${process.env.OPEN_AI_KEY}`,
+    Authorization: `Bearer ${process.env.VCORP_AI_KEY}`,
   };
   const data = {
     version: 5,

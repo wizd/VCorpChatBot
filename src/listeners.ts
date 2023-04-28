@@ -90,16 +90,10 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
     // get talkerid
     const talkerid = message.talker().id;
     console.log('talkerid is: ', talkerid);
-    // const ssoid = await getOrCreateSSOByWeixinId(talkerid, botid);
-    // //const vcuser = await getOrCreateUserByWeixinId(talkerid);
-    // if (ssoid === null) {
-    //   console.log('Fatal error!!!!! ssoid is null for talkerid: ', talkerid);
-    //   return;
-    // }
 
     await msgRootDispatcher(bot, botid, message, contact, room);
   } catch (err) {
-    console.log('Fatal error!!!!! vcuser is null for talkerid: ', err);
+    console.log('Error: ', err);
     return;
   }
 
