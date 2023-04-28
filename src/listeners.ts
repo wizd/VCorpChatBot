@@ -98,8 +98,6 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   }
 
   return;
-  /*
-   */
 }
 
 const listeners = [onScan, onLogout, onLogin, onFriendship, onMessage];

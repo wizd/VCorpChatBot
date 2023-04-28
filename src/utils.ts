@@ -1,30 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
-import http from 'http';
-import readline from 'readline';
 
-axios.defaults.timeout = 60000;
-
-export const confirmReadline = async (question: string, passReg: RegExp) => {
-  return new Promise((resolve) => {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-    rl.question(question, (answer: string) => {
-      if (passReg.test(answer) || !answer) {
-        return resolve({ confirm: true, answer });
-      }
-      resolve({ confirm: false, answer });
-      rl.close();
-    });
-  });
-};
-export const asyncSleep = async (number: number) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, number);
-  });
-};
+axios.defaults.timeout = 180000;
 
 export const fetchApi = async (
   apiUrl: string,
@@ -63,14 +39,3 @@ export const fetchApi = async (
     data: body,
   }).then((res: AxiosResponse) => res.data);
 };
-
-export function extractSubscriptionCode(text: string): string | null {
-  const regex = /兑换订阅码\s+([a-zA-Z0-9]{4}-[a-zA-Z0-9]{4})/;
-  const match = text.match(regex);
-
-  if (match && match[1]) {
-    return match[1];
-  }
-
-  return null;
-}
