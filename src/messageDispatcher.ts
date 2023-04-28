@@ -56,7 +56,11 @@ export const msgRootDispatcher = async (
   if (message.type() === 11) {
     const reply = await wxTransWithVCorp(botid, talkerid, text, room?.id);
     //await moneyTransferHandler(ssoid, message, input, contact, room, botid);
-    await message.say(reply);
+    if (reply.status === 'success') {
+      await message.say(reply.messages[0].content);
+    } else {
+      await message.say('转账处理失败，请联系客服（输入‘帮助’有详情）。');
+    }
     return;
   }
 

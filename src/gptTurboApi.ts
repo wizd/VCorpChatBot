@@ -35,7 +35,7 @@ const chatWithVCorp = async (
     messages,
   };
   const answer = await fetchApi(
-    process.env.VCORP_AI_URL || 'http://192.168.3.59:3001/vc/v1/chat',
+    process.env.VCORP_AI_URL + '/chat',
     'POST',
     { headers, timeout: 180000 },
     data
@@ -54,7 +54,7 @@ export const wxTransWithVCorp = async (
     Authorization: `Bearer ${process.env.OPEN_AI_KEY}`,
   };
   const data = {
-    version: 4,
+    version: 5,
     nostream: true,
     agentid,
     userid,
@@ -63,7 +63,7 @@ export const wxTransWithVCorp = async (
     rawstr,
   };
   const answer = await fetchApi(
-    process.env.VCORP_AI_URL || 'http://192.168.3.59:3001/vc/v1/wxtrans',
+    process.env.VCORP_AI_URL + '/wxtrans',
     'POST',
     { headers, timeout: 180000 },
     data
