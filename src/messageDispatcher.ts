@@ -61,13 +61,16 @@ export const msgRootDispatcher = async (
     try {
       let adminOnly = false;
       const idcount = await room.memberAll();
-      if (idcount.length < 50 && room?.id !== process.env.BOT_ADMIN_ROOMID) {
-        console.log('room member count is less than 50, ignore message');
-        adminOnly = true;
-      }
+      // if (idcount.length < 50 && room?.id !== process.env.BOT_ADMIN_ROOMID) {
+      //   console.log('room member count is less than 50, ignore message');
+      //   adminOnly = true;
+      // }
 
       const topic = await room.topic();
-      const selfName = process.env.SELF_NAME; // bot.currentUser.name();
+      console.log("Bot current user name is: ", bot.currentUser.name());
+      const selfName =  bot.currentUser.name();
+      //process.env.SELF_NAME; 
+      // bot.currentUser.name();
 
       console.log(`room topic is : ${topic}, ${text}`);
       if (text.indexOf(`@${selfName}`) !== -1) {
