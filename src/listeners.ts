@@ -94,6 +94,7 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
     await msgRootDispatcher(bot, botid, message, contact, room);
   } catch (err) {
     console.log('Error: ', err);
+    await message.say(`[非常抱歉，发生了系统错误：${err}，请联系客服。]`);
     return;
   }
 
