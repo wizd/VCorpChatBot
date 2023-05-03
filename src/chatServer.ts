@@ -12,8 +12,6 @@ export const chatWithVCorp = async (
   };
   const data = {
     version: 4,
-    veid: 'B0001',
-    vename: 'AI 助手',
     nostream: true,
     agentid,
     userid,
