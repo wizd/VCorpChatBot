@@ -73,9 +73,13 @@ export const msgRootDispatcher = async (
       const selfName = bot.currentUser.name();
       //process.env.SELF_NAME;
       // bot.currentUser.name();
+      const tolist = await message.mentionList();
 
       console.log(`room topic is : ${topic}, ${text}`);
-      if (text.indexOf(`@${selfName}`) !== -1) {
+      if (
+        text.indexOf(`@${selfName}`) !== -1 ||
+        tolist.find((a) => a.id === botid)
+      ) {
         text = text.replace(`@${selfName}`, '').trim();
         if (!text) return;
 
