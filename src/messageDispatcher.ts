@@ -4,7 +4,7 @@ import {
   RoomInterface,
   WechatyInterface,
 } from 'wechaty/impls';
-import { chatWithVCorp, wxTransWithVCorp } from './chatServer';
+import { chatWithVCorp, wxTransWithVCorp } from './chatServer.js';
 import { FileBox, FileBoxInterface } from 'file-box';
 import axios from 'axios';
 

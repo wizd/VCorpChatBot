@@ -5,7 +5,7 @@ import {
   MessageInterface,
   WechatyInterface,
 } from 'wechaty/impls';
-import { msgRootDispatcher } from './messageDispatcher';
+import { msgRootDispatcher } from './messageDispatcher.js';
 import { Message } from 'wechaty';
 
 const sendMessage = async (

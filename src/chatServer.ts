@@ -1,4 +1,4 @@
-import { fetchApi } from './utils';
+import { fetchApi } from './utils.js';
 
 export const chatWithVCorp = async (
   agentid: string,
