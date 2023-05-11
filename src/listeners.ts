@@ -8,6 +8,8 @@ import {
 import { msgRootDispatcher } from './messageDispatcher.js';
 import { Message } from 'wechaty';
 
+let thebot: WechatyInterface;
+
 const sendMessage = async (
   bot: WechatyInterface,
   contact: ContactInterface,
@@ -31,6 +33,11 @@ let botid = '';
 async function onLogin(user: ContactSelfInterface) {
   console.log(`User ${user} logged in`);
   console.log('my user id is: ', user.id);
+
+  // don't work. padlocal cache them all.
+  // const contactMeLatest = (await thebot.Contact.find({ id: user.id }))!;
+  // console.log('My latest user name is: ', contactMeLatest.name());
+
   botid = user.id;
 }
 function onLogout(user: ContactSelfInterface) {
@@ -103,6 +110,7 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
 
 const listeners = [onScan, onLogout, onLogin, onFriendship, onMessage];
 export const bindListeners = (bot: WechatyInterface) => {
+  thebot = bot;
   return bot
     .on('scan', onScan)
     .on('login', onLogin)

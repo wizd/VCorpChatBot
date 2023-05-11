@@ -7,6 +7,7 @@ import {
 import { chatWithVCorp, wxTransWithVCorp } from './chatServer.js';
 import { FileBox, FileBoxInterface } from 'file-box';
 import axios from 'axios';
+import { parseHistoryXml } from './chatHistMsg.js';
 
 const bypassMsgTypes = [4, 13];
 
@@ -29,6 +30,14 @@ export const msgRootDispatcher = async (
   if (message.type() === 13) {
     // notify from weixin that you have a pending transfer
     return;
+  }
+
+  if (message.type() === 4) {
+    // chat history
+    // console.log('message history xml is: \n', input);
+    // const messages = await parseHistoryXml(input);
+    // console.log('Got chat history: ', messages);
+    // return;
   }
 
   // msg type 6 is image

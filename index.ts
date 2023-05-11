@@ -6,8 +6,10 @@ import { connectHumine } from './src/socksClient.js';
 
 dotenv.config();
 
-// first connect to humine engine
-const socket = await connectHumine();
+// first connect to humine engineconst socket = await connectHumine();
+(async () => {
+  const socket = await connectHumine();
+})();
 
 const token = process.env.PAD_LOCAL_KEY;
 const puppet = new PuppetPadlocal({

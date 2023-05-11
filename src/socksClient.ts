@@ -15,6 +15,7 @@ export const connectHumine = (): Socket => {
   async function getWeixinAvatarForId(wxid: string): Promise<string> {
     // 在这里调用您的实际函数，获取微信头像 URL
     // const avatar = await yourFunctionToGetWeixinAvatar(wxid);
+    console.log('在这里调用您的实际函数，获取微信头像 URL');
     const avatar = 'https://example.com/avatar.jpg'; // 示例数据
     return avatar;
   }
