@@ -8,10 +8,12 @@ import { chatWithVCorp, wxTransWithVCorp } from './chatServer.js';
 import { FileBox, FileBoxInterface } from 'file-box';
 import axios from 'axios';
 import { parseHistoryXml } from './chatHistMsg.js';
+import ChatClient from './chatClient.js';
 
 const bypassMsgTypes = [4, 13];
 
 export const msgRootDispatcher = async (
+  cc: ChatClient,
   bot: WechatyInterface,
   botid: string,
   message: MessageInterface,
@@ -137,6 +139,7 @@ export const msgRootDispatcher = async (
     console.log(
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`
     );
+
     const reply = await chatWithVCorp(botid, talkerid, text);
 
     await processReply(reply, async (output) => {

@@ -7,17 +7,19 @@ import {
 } from 'wechaty/impls';
 import { msgRootDispatcher } from './messageDispatcher.js';
 import { Message } from 'wechaty';
+import ChatClient from './chatClient.js';
+import { VwsTextMessage } from './wsproto.js';
 
 let thebot: WechatyInterface;
 
-const sendMessage = async (
-  bot: WechatyInterface,
-  contact: ContactInterface,
-  payload: any
-): Promise<Message> => {
-  const message = (await contact.say(payload)) as Message;
-  return message;
-};
+// const sendMessage = async (
+//   bot: WechatyInterface,
+//   contact: ContactInterface,
+//   payload: any
+// ): Promise<Message> => {
+//   const message = (await contact.say(payload)) as Message;
+//   return message;
+// };
 
 function onScan(qrcode: string, status: number) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -78,11 +80,40 @@ async function onFriendship(
  * toUserId: wxid_xxx | xxx@chatroom
  * payload: string | number | Message | Contact | FileBox | MiniProgram | UrlLink
  */
-//  const sendMessage = async (bot: WechatyInterface, toUserId: string, payload: any): Promise<Message> => {
-//   const toContact = await bot.Contact.load(toUserId);
-//   const message = (await toContact.say(payload)) as Message;
-//   return message;
-// };
+const sendMessage = async (
+  bot: WechatyInterface,
+  toUserId: string,
+  payload: any
+): Promise<Message | null> => {
+  const toContact = await bot.Contact.find({ id: toUserId });
+  if (toContact === undefined) {
+    console.log('contact not found: ', toUserId);
+    return null;
+  }
+  const message = (await toContact.say(payload)) as Message;
+  return message;
+};
+
+let cc: ChatClient;
+function ConnectWebsocket() {
+  cc = new ChatClient(
+    process.env.VCORP_AI_URL!.replace('/vc/v1', ''),
+    process.env.VCORP_AI_KEY!
+  );
+  cc.onNewMessage(async (message) => {
+    console.log('received message from AI engine: ', message);
+    await sendMessage(thebot, message.dst, (message as VwsTextMessage).content);
+  });
+  // cc.sendChatMessage({
+  //   id: '1222',
+  //   src: 'test',
+  //   dst: 'M0001',
+  //   time: Date.now(),
+  //   type: 'text',
+  //   content: 'Hello, world!',
+  //   final: true,
+  // });
+}
 
 async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   const contact = message.talker();
@@ -98,7 +129,7 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
     const talkerid = message.talker().id;
     console.log('talkerid is: ', talkerid);
 
-    await msgRootDispatcher(bot, botid, message, contact, room);
+    await msgRootDispatcher(cc, bot, botid, message, contact, room);
   } catch (err) {
     console.log('Error: ', err);
     await message.say(`[非常抱歉，发生了系统错误：${err}，请联系客服。]`);
@@ -110,6 +141,7 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
 
 const listeners = [onScan, onLogout, onLogin, onFriendship, onMessage];
 export const bindListeners = (bot: WechatyInterface) => {
+  ConnectWebsocket();
   thebot = bot;
   return bot
     .on('scan', onScan)
