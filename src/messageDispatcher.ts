@@ -9,6 +9,7 @@ import { FileBox, FileBoxInterface } from 'file-box';
 import axios from 'axios';
 import { parseHistoryXml } from './chatHistMsg.js';
 import ChatClient from './chatClient.js';
+import { VwsSystemMessage } from './wsproto.js';
 
 const bypassMsgTypes = [4, 13];
 
@@ -69,6 +70,23 @@ export const msgRootDispatcher = async (
     }
     return;
   }
+
+  if(process.env.MODE === 'personal'){
+    if(message.payload){
+      const archmsg : VwsSystemMessage = {
+        id: new Date().getTime().toString(),
+        src: "ws",
+        dst: "server",
+        type: "system",
+        time: new Date().getTime(),
+        cmd: "weixinarchive",
+        note: JSON.stringify(message.payload)
+      };
+      cc.sendChatMessage(archmsg);
+    }
+    return;
+  }
+
 
   if (room) {
     try {

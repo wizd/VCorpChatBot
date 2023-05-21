@@ -6,7 +6,14 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const token = process.env.PAD_LOCAL_KEY;
-if(token){
+
+if(process.env.MODE === 'personal'){
+  console.log("Using default settings.");
+  const bot = WechatyBuilder.build();
+
+  bindListeners(bot).start();
+}
+else{
   console.log("Using padlocal.");
   const puppet = new PuppetPadlocal({
     token,
@@ -16,12 +23,6 @@ if(token){
     name: 'chaty-wechat-bot',
     puppet,
   });
-
-  bindListeners(bot).start();
-}
-else{
-  console.log("Using default settings.");
-  const bot = WechatyBuilder.build();
 
   bindListeners(bot).start();
 }
