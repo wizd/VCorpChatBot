@@ -9,6 +9,8 @@ import { msgRootDispatcher } from './messageDispatcher.js';
 import { Message } from 'wechaty';
 import ChatClient from './chatClient.js';
 import { VwsTextMessage } from './wsproto.js';
+import QRCode from "qrcode-terminal";
+
 
 let thebot: WechatyInterface;
 
@@ -23,7 +25,7 @@ let thebot: WechatyInterface;
 
 function onScan(qrcode: string, status: number) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require('qrcode-terminal').generate(qrcode, { small: true }); // 在console端显示二维码
+  QRCode.generate(qrcode, { small: true }); // 在console端显示二维码
   const qrcodeImageUrl = [
     'https://wechaty.js.org/qrcode/',
     encodeURIComponent(qrcode),
