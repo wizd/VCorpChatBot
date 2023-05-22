@@ -8,9 +8,15 @@ import {
 import { msgRootDispatcher } from './messageDispatcher.js';
 import { Message } from 'wechaty';
 import ChatClient from './chatClient.js';
-import { VwsTextMessage } from './wsproto.js';
-import QRCode from "qrcode-terminal";
-
+import {
+  VwsAudioMessage,
+  VwsTextMessage,
+  isVwsAudioMessage,
+  isVwsTextMessage,
+} from './wsproto.js';
+import QRCode from 'qrcode-terminal';
+import { FileBox } from 'file-box';
+import { toBuffer } from './utils.js';
 
 let thebot: WechatyInterface;
 
@@ -102,9 +108,28 @@ function ConnectWebsocket() {
     process.env.VCORP_AI_URL!.replace('/vc/v1', ''),
     process.env.VCORP_AI_KEY!
   );
-  cc.onNewMessage(async (message) => {
-    console.log('received message from AI engine: ', message);
-    await sendMessage(thebot, message.dst, (message as VwsTextMessage).content);
+  cc.onNewMessage(async (vmsg) => {
+    try {
+      console.log('received message from AI engine: ', vmsg);
+      if (isVwsTextMessage(vmsg)) {
+        const tmsg = vmsg as VwsTextMessage;
+        console.log('Send to', tmsg.dst, 'content: ', tmsg.content);
+        await sendMessage(thebot, vmsg.dst, tmsg.content);
+      } else if (isVwsAudioMessage(vmsg)) {
+        const audmsg = vmsg as VwsAudioMessage;
+        console.log('duration is: ', audmsg.duration);
+
+        const fileBox = FileBox.fromBuffer(toBuffer(audmsg.data), 'voice.sil');
+        //fileBox.mediaType = 'audio/silk';
+        fileBox.metadata = {
+          voiceLength: audmsg.duration ?? 2000,
+        };
+
+        const message = await sendMessage(thebot, audmsg.dst, fileBox);
+      }
+    } catch (err) {
+      console.log('error in cc.onNewMessage: ', err);
+    }
   });
   // cc.sendChatMessage({
   //   id: '1222',
