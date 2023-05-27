@@ -56,8 +56,8 @@ export const msgRootDispatcher = async (
       const urlLink: UrlLink = await message.toUrlLink();
       // urlLink: 链接主要数据：包括 title，URL，description
 
-      const urlThumbImage = await message.toFileBox();
-      const urlThumbImageData = await urlThumbImage.toBuffer();
+      //const urlThumbImage = await message.toFileBox();
+      //const urlThumbImageData = await urlThumbImage.toBuffer();
       // urlThumbImageData: 链接的缩略图二进制数据
 
       break;
