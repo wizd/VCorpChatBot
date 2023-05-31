@@ -1,1 +1,1 @@
-ts-node index.ts
+ts-node --esm index.ts
