@@ -3,3 +3,4 @@
 **/.env
 **/dist
 **/*memory-card.json
+run_*.bat
