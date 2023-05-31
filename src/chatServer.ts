@@ -1,3 +1,4 @@
+import { VCORP_AI_KEY, VCORP_AI_URL } from '../index.js';
 import { fetchApi } from './utils.js';
 
 export const chatWithVCorp = async (
@@ -8,7 +9,7 @@ export const chatWithVCorp = async (
   adminOnly?: boolean
 ) => {
   const headers: Record<string, any> = {
-    Authorization: `Bearer ${process.env.VCORP_AI_KEY}`,
+    Authorization: `Bearer ${VCORP_AI_KEY}`,
   };
   const data = {
     version: 4,
@@ -21,7 +22,7 @@ export const chatWithVCorp = async (
     messages: [{ role: 'user', content: message }],
   };
   const answer = await fetchApi(
-    process.env.VCORP_AI_URL + '/chat',
+    VCORP_AI_URL + '/chat',
     'POST',
     { headers, timeout: 180000 },
     data
@@ -38,7 +39,7 @@ export const wxTransWithVCorp = async (
   roomid?: string
 ) => {
   const headers: Record<string, any> = {
-    Authorization: `Bearer ${process.env.VCORP_AI_KEY}`,
+    Authorization: `Bearer ${VCORP_AI_KEY}`,
   };
   const data = {
     version: 5,
@@ -50,7 +51,7 @@ export const wxTransWithVCorp = async (
     rawstr,
   };
   const answer = await fetchApi(
-    process.env.VCORP_AI_URL + '/wxtrans',
+    VCORP_AI_URL + '/wxtrans',
     'POST',
     { headers, timeout: 180000 },
     data

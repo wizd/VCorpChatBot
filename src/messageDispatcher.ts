@@ -13,6 +13,7 @@ import ChatClient from './chatClient.js';
 import { VwsSystemMessage } from './wsproto.js';
 import { MiniProgram, UrlLink } from 'wechaty';
 import { VwsAudioMessage } from './wsproto.js';
+import { MODE } from '../index.js';
 
 const bypassMsgTypes = [4, 13];
 
@@ -199,7 +200,7 @@ export const msgRootDispatcher2 = async (
     return;
   }
 
-  if (process.env.MODE === 'personal') {
+  if (MODE === 'personal') {
     if (message.payload) {
       const archmsg: VwsSystemMessage = {
         id: new Date().getTime().toString(),
@@ -219,7 +220,7 @@ export const msgRootDispatcher2 = async (
     try {
       const adminOnly = false;
       const idcount = await room.memberAll();
-      // if (idcount.length < 50 && room?.id !== process.env.BOT_ADMIN_ROOMID) {
+      // if (idcount.length < 50 && room?.id !== BOT_ADMIN_ROOMID) {
       //   console.log('room member count is less than 50, ignore message');
       //   adminOnly = true;
       // }
@@ -227,8 +228,7 @@ export const msgRootDispatcher2 = async (
       const topic = await room.topic();
       console.log('Bot current user name is: ', bot.currentUser.name());
       const selfName = bot.currentUser.name();
-      //process.env.SELF_NAME;
-      // bot.currentUser.name();
+
       const tolist = await message.mentionList();
 
       console.log(`room topic is : ${topic}, ${text}`);

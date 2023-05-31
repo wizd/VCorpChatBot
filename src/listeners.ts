@@ -17,6 +17,7 @@ import {
 import QRCode from 'qrcode-terminal';
 import { FileBox } from 'file-box';
 import { toBuffer } from './utils.js';
+import { VCORP_AI_KEY, VCORP_AI_URL } from '../index.js';
 
 let thebot: WechatyInterface;
 
@@ -105,8 +106,8 @@ const sendMessage = async (
 let cc: ChatClient;
 function ConnectWebsocket() {
   cc = new ChatClient(
-    process.env.VCORP_AI_URL!.replace('/vc/v1', ''),
-    process.env.VCORP_AI_KEY!
+    VCORP_AI_URL!.replace('/vc/v1', ''),
+    VCORP_AI_KEY!
   );
   cc.onNewMessage(async (vmsg) => {
     try {
