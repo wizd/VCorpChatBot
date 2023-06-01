@@ -1,8 +1,8 @@
 @echo off
 chcp 65001
 
-rem 下面是运行模式：配合padlocal时请用powerbot，否则请用personal
-set MODE=personal
+rem 下面是运行模式：配合padlocal时请用powerbot，完全为自己服务请用personal，作为bot提供公共服务请用pubbot
+set MODE=pubbot
 
 rem 下面是运行窗口标题名字：自己觉得清晰可记就行。
 set NAME="Some great name"
