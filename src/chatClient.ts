@@ -25,7 +25,12 @@ class ChatClient {
 
   constructor(serverUrl: string, token: string) {
     this.jwt = token;
-    this.socket = io(serverUrl, { query: { jwt: this.jwt } });
+    this.socket = io(serverUrl, {
+      query: { jwt: this.jwt },
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: this.autoReconnectInterval,
+    });
 
     // 客户端监听服务器发来的聊天消息
     this.socket.on('smsg', async (message: VwsMessage) => {
@@ -44,9 +49,6 @@ class ChatClient {
     // 监听断线事件
     this.socket.on('disconnect', () => {
       console.log('Disconnected from chat server. Attempting to reconnect...');
-      setTimeout(() => {
-        this.socket.connect();
-      }, this.autoReconnectInterval);
     });
 
     this.socket.on('connect', () => {

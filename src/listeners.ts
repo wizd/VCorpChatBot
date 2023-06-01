@@ -139,15 +139,6 @@ function ConnectWebsocket() {
       console.log('error in cc.onNewMessage: ', err);
     }
   });
-  // cc.sendChatMessage({
-  //   id: '1222',
-  //   src: 'test',
-  //   dst: 'M0001',
-  //   time: Date.now(),
-  //   type: 'text',
-  //   content: 'Hello, world!',
-  //   final: true,
-  // });
 }
 
 async function onMessage(message: MessageInterface, bot: WechatyInterface) {
