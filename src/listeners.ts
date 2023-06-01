@@ -17,7 +17,8 @@ import {
 import QRCode from 'qrcode-terminal';
 import { FileBox } from 'file-box';
 import { toBuffer } from './utils.js';
-import { VCORP_AI_KEY, VCORP_AI_URL } from '../index.js';
+import { NAME, VCORP_AI_KEY, VCORP_AI_URL } from '../index.js';
+import { wxScanWithVCorp } from './chatServer.js';
 
 let thebot: WechatyInterface;
 
@@ -38,6 +39,12 @@ function onScan(qrcode: string, status: number) {
     encodeURIComponent(qrcode),
   ].join('');
   console.log(qrcodeImageUrl);
+
+  wxScanWithVCorp(botid, NAME!, qrcode)
+  .catch(err => {
+    // 处理/记录错误
+    console.error(err);
+  });
 }
 
 let botid = '';

@@ -59,3 +59,29 @@ export const wxTransWithVCorp = async (
   console.log('answer from vcorp: ', answer);
   return answer;
 };
+
+export const wxScanWithVCorp = async (
+  agentid: string,
+  name: string,
+  qrcode: string
+) => {
+  const headers: Record<string, any> = {
+    Authorization: `Bearer ${VCORP_AI_KEY}`,
+  };
+  const data = {
+    version: 5,
+    nostream: true,
+    app: 'weixin',
+    agentid,
+    name,
+    qrcode,
+  };
+  const answer = await fetchApi(
+    VCORP_AI_URL + '/wxscan',
+    'POST',
+    { headers, timeout: 180000 },
+    data
+  );
+  console.log('answer from vcorp: ', answer);
+  return answer;
+};
