@@ -31,8 +31,13 @@ class ChatClient {
     this.socket.on('smsg', async (message: VwsMessage) => {
       console.log('Received chat message from server:', message);
       // 调用回调函数（如果已提供）
-      for (const subscriber of this.messageSubscribers) {
-        subscriber(message);
+      try{
+        for (const subscriber of this.messageSubscribers) {
+          subscriber(message);
+        }
+      }
+      catch(err) {
+        console.log("error process message from server:", err);
       }
     });
 
