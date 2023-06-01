@@ -261,6 +261,9 @@ export const msgRootDispatcher2 = async (
           }
         });
       }
+      else {
+        console.log("message is not for me.");
+      }
     } catch (err) {
       console.log((err as Error).message);
     }
