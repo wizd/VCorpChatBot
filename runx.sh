@@ -15,6 +15,8 @@ PAD_LOCAL_KEY="${4:-puppet_padlocal_...}"
 # 服务器地址默认不用改
 VCORP_AI_URL="${5:-https://mars.vcorp.ai/vc/v1}"
 
+echo "using server url: $VCORP_AI_URL"
+
 while true; do
   rm -f chaty-wechat-bot.memory-card.json
   ts-node --esm index.ts --MODE "$MODE" --VCORP_AI_URL "$VCORP_AI_URL" --NAME "$NAME" --VCORP_AI_KEY "$VCORP_AI_KEY" --PAD_LOCAL_KEY "$PAD_LOCAL_KEY"
