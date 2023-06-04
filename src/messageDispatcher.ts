@@ -331,8 +331,11 @@ function extractFilenameFromImageUrl(url: string): string {
 
 async function downloadImage(url: string): Promise<Buffer> {
   try {
-    console.log('downloading image: ', url);
-    const response = await axios.get(url, {
+    // for speed, replace default url to customized url
+    const fastUrl = url.replace("https://mars.vcorp.ai/vc/v1", process.env.VCORP_AI_URL!);
+
+    console.log('downloading image: ', fastUrl);
+    const response = await axios.get(fastUrl, {
       responseType: 'arraybuffer',
       timeout: 90000, // 设置 90 秒超时
     });
