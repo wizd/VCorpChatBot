@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # 运行模式：配合padlocal时请用powerbot，完全为自己服务请用personal，作为bot提供公共服务请用pubbot
 MODE="${1:-pubbot}"

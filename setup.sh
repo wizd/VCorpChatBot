@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Install global dependencies
 npm install -g typescript ts-node
