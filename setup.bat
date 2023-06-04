@@ -1,4 +1,4 @@
-npm install -g typescript ts-node npm-force-resolutions
+npm install -g typescript ts-node
 npm install
 tsc
 if exist .env (
