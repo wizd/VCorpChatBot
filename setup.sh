@@ -7,7 +7,7 @@ npm install -g typescript ts-node
 npm install
 
 # Compile TypeScript
-tsc
+npm run build
 
 # Check if .env file exists, if not, copy .env.example to .env and open it with a text editor
 if [ -f ".env" ]; then
