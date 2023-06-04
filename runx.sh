@@ -22,7 +22,7 @@ echo "using server url: $VCORP_AI_URL"
 WECHATY_NAME=$NAME
 
 while true; do
-  ts-node --esm index.ts --MODE "$MODE" --VCORP_AI_URL "$VCORP_AI_URL" --NAME "$NAME" --VCORP_AI_KEY "$VCORP_AI_KEY" --PAD_LOCAL_KEY "$PAD_LOCAL_KEY"
+  node dist/index --MODE "$MODE" --VCORP_AI_URL "$VCORP_AI_URL" --NAME "$NAME" --VCORP_AI_KEY "$VCORP_AI_KEY" --PAD_LOCAL_KEY "$PAD_LOCAL_KEY"
   exit_code=$?
   if [ $exit_code -ne 0 ]; then
     echo "Process exited with code $exit_code. Waiting for 30 seconds before restarting..."
