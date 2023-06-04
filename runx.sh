@@ -13,7 +13,7 @@ VCORP_AI_KEY="${3:-bk_......}"
 PAD_LOCAL_KEY="${4:-puppet_padlocal_...}"
 
 # 服务器地址默认不用改
-VCORP_AI_URL="https://mars.vcorp.ai/vc/v1"
+VCORP_AI_URL="${5:-https://mars.vcorp.ai/vc/v1}"
 
 while true; do
   rm -f chaty-wechat-bot.memory-card.json
