@@ -17,6 +17,7 @@ rem 下面服务器地址默认不用改
 set VCORP_AI_URL=https://mars.vcorp.ai/vc/v1
 
 :loop
+del chaty-wechat-bot.memory-card.json
 ts-node --esm index.ts --MODE %MODE% --VCORP_AI_URL %VCORP_AI_URL% --NAME %NAME% --VCORP_AI_KEY %VCORP_AI_KEY% --PAD_LOCAL_KEY %PAD_LOCAL_KEY%
 if %errorlevel% neq 0 (
     echo Process exited with code %errorlevel%. Waiting for 30 seconds before restarting...

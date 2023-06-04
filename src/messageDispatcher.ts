@@ -94,6 +94,7 @@ export const msgRootDispatcher = async (
         src: message.payload?.talkerId ?? '',
         dst: 'humine',
         type: 'audio',
+        fmt: audioFileBox.name.endsWith("mp3") ? "mp3" : undefined,
         time: new Date().getTime(),
         data: toArrayBuffer(audioData),
       };

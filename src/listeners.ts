@@ -127,11 +127,14 @@ function ConnectWebsocket() {
         const audmsg = vmsg as VwsAudioMessage;
         console.log('duration is: ', audmsg.duration);
 
-        const fileBox = FileBox.fromBuffer(toBuffer(audmsg.data), 'voice.sil');
+        const fileBox = FileBox.fromBuffer(toBuffer(audmsg.data), audmsg.duration === 0 ? 'voice.mp3' : 'voice.sil');
         //fileBox.mediaType = 'audio/silk';
-        fileBox.metadata = {
-          voiceLength: audmsg.duration ?? 2000,
-        };
+        if(audmsg.duration !== 0)
+        {
+          fileBox.metadata = {
+            voiceLength: audmsg.duration ?? 2000,
+          };
+        }
 
         const message = await sendMessage(thebot, audmsg.dst, fileBox);
       }

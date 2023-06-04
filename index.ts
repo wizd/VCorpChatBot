@@ -42,6 +42,7 @@ if (MODE === 'powerbot') {
 }
 else {
   console.log("Using default settings.");
+
   const bot = WechatyBuilder.build();
 
   bindListeners(bot).start();
