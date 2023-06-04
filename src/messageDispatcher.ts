@@ -105,7 +105,7 @@ export const msgRootDispatcher = async (
     case PUPPET.types.Message.Video: {
       const videoFileBox = await message.toFileBox();
 
-      const videoData: Buffer = await videoFileBox.toBuffer();
+      //const videoData: Buffer = await videoFileBox.toBuffer();
       // videoData: 视频文件二进制数
       break;
     }
@@ -123,7 +123,7 @@ export const msgRootDispatcher = async (
     case PUPPET.types.Message.Attachment: {
       const attachFileBox = await message.toFileBox();
 
-      const attachData = await attachFileBox.toBuffer();
+      //const attachData = await attachFileBox.toBuffer();
       // attachData: 文件二进制数据
 
       break;
