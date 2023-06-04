@@ -334,7 +334,7 @@ async function downloadImage(url: string): Promise<Buffer> {
     console.log('downloading image: ', url);
     const response = await axios.get(url, {
       responseType: 'arraybuffer',
-      timeout: 8000, // 设置 10 秒超时
+      timeout: 90000, // 设置 90 秒超时
     });
 
     const buffer = Buffer.from(response.data, 'binary');
