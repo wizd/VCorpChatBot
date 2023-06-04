@@ -14,5 +14,4 @@ if [ -f ".env" ]; then
     echo ".env file already exists, no need to copy"
 else
     cp .env.example .env
-    nano .env
 fi
