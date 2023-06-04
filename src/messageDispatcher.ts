@@ -113,7 +113,8 @@ export const msgRootDispatcher = async (
     case PUPPET.types.Message.Emoticon: {
       const emotionFile = await message.toFileBox();
 
-      const emotionData: Buffer = await emotionFile.toBuffer();
+      // cause: Error:  Error: protocol is empty
+      //const emotionData: Buffer = await emotionFile.toBuffer();
       // emotionData: 动图 Gif文件 二进制数据
 
       break;
