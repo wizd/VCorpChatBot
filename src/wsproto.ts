@@ -45,6 +45,7 @@ export interface VwsAudioMessage extends VwsBaseMessage {
 
 export interface VwsBlobMessage extends VwsBaseMessage {
   type: "blob";
+  fn: string; // 文件名
   data: ArrayBuffer; // Blob 数据
 }
 

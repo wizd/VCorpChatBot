@@ -34,35 +34,56 @@ export const msgRootDispatcher = async (
     // 图片消息
     case PUPPET.types.Message.Image: {
       const file = await message.toFileBox();
+      console.log("Image File is: ", file);
 
       const blob: Buffer = await file.toBuffer();
-      // audioData: silk 格式的语音文件二进制数据
       // send to humine
-      const audiomsg: VwsBlobMessage = {
+      const blobmsg: VwsBlobMessage = {
         id: new Date().getTime().toString(),
         src: message.payload?.talkerId ?? '',
         dst: 'humine',
         time: new Date().getTime(),
         type: "blob",
+        fn: file.name,
         data: toArrayBuffer(blob),
       };
-      cc.sendChatMessage(audiomsg);
+      cc.sendChatMessage(blobmsg);
 
-      //const messageImage = await message.toImage();
+      // const messageImage = await message.toImage();
 
-      // 缩略图
-      //const thumbImage = await messageImage.thumbnail();
-      //const thumbImageData = await thumbImage.toBuffer();
-      // thumbImageData: 缩略图图片二进制数据
+      // // 缩略图
+      // try
+      // {
+      //   const thumbImage = await messageImage.thumbnail();
+      //   const thumbImageData = await thumbImage.toBuffer();
+      // }
+      // catch(err) {
+      //   console.log("get small pic error:", err);
+      // }
 
-      // 大图
-      // const hdImage = await messageImage.hd();
-      // const hdImageData = await hdImage.toBuffer();
-      // 大图图片二进制数据
+      // // thumbImageData: 缩略图图片二进制数据
 
-      // 原图
-      // const artworkImage = await messageImage.artwork();
-      // const artworkImageData = await artworkImage.toBuffer();
+      // // 大图
+      // try
+      // {
+      //   const hdImage = await messageImage.hd();
+      //   const hdImageData = await hdImage.toBuffer();
+      // }
+      // catch(err) {
+      //   console.log("get big pic error:", err);
+      // }
+      // // 大图图片二进制数据
+
+      // // 原图
+      // try
+      // {
+      //   const artworkImage = await messageImage.artwork();
+      //   const artworkImageData = await artworkImage.toBuffer();
+      // }
+      // catch(err) {
+      //   console.log("get art pic error:", err);
+      // }
+
       // artworkImageData: 原图图片二进制数据
 
       

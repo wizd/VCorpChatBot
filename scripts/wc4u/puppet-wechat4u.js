@@ -515,7 +515,8 @@ export class PuppetWechat4u extends PUPPET.Puppet {
                  * 图片消息
                  */
                 console.log('图片消息，保存到本地')
-                return FileBox.fromStream((await this.wechat4u.getMsgImg(rawPayload.MsgId)).data, filename);
+                const obj = await this.wechat4u.getMsgImg(rawPayload.MsgId);
+                return FileBox.fromBuffer(obj.data, obj.type);
             case PUPPET.types.Message.Audio: {
                 /**
                  * 语音消息
