@@ -10,7 +10,7 @@ import { FileBox, FileBoxInterface } from 'file-box';
 import axios from 'axios';
 import { parseHistoryXml } from './chatHistMsg.js';
 import ChatClient from './chatClient.js';
-import { VwsSystemMessage } from './wsproto.js';
+import { VwsBlobMessage, VwsImageMessage, VwsSystemMessage } from './wsproto.js';
 import { MiniProgram, UrlLink } from 'wechaty';
 import { VwsAudioMessage } from './wsproto.js';
 import { MODE } from '../index.js';
@@ -33,23 +33,41 @@ export const msgRootDispatcher = async (
     }
     // 图片消息
     case PUPPET.types.Message.Image: {
-      const messageImage = await message.toImage();
+      const file = await message.toFileBox();
+
+      const blob: Buffer = await file.toBuffer();
+      // audioData: silk 格式的语音文件二进制数据
+      // send to humine
+      const audiomsg: VwsBlobMessage = {
+        id: new Date().getTime().toString(),
+        src: message.payload?.talkerId ?? '',
+        dst: 'humine',
+        time: new Date().getTime(),
+        type: "blob",
+        data: toArrayBuffer(blob),
+      };
+      cc.sendChatMessage(audiomsg);
+
+      //const messageImage = await message.toImage();
 
       // 缩略图
-      const thumbImage = await messageImage.thumbnail();
-      const thumbImageData = await thumbImage.toBuffer();
+      //const thumbImage = await messageImage.thumbnail();
+      //const thumbImageData = await thumbImage.toBuffer();
       // thumbImageData: 缩略图图片二进制数据
 
       // 大图
-      const hdImage = await messageImage.hd();
-      const hdImageData = await hdImage.toBuffer();
+      // const hdImage = await messageImage.hd();
+      // const hdImageData = await hdImage.toBuffer();
       // 大图图片二进制数据
 
       // 原图
-      const artworkImage = await messageImage.artwork();
-      const artworkImageData = await artworkImage.toBuffer();
+      // const artworkImage = await messageImage.artwork();
+      // const artworkImageData = await artworkImage.toBuffer();
       // artworkImageData: 原图图片二进制数据
 
+      
+
+      console.log("got an image!");
       break;
     }
     // 链接卡片消息
@@ -335,7 +353,7 @@ const customAxiosInstance = axios.create({
 
 async function downloadImage(url: string): Promise<Buffer> {
   try {
-    const fastUrl = url.replace("https://mars.vcorp.ai", process.env.VCORP_AI_URL!.replace("/vc/v1", ""));
+    const fastUrl = url;//url.replace("https://mars.vcorp.ai", process.env.VCORP_AI_URL!.replace("/vc/v1", ""));
     console.log('downloading image: ', fastUrl);
 
     const response = await customAxiosInstance.get(fastUrl, {
