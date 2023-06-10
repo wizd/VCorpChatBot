@@ -22,6 +22,7 @@ export async function uploadFile(
       );
       onProgress?.(percentCompleted);
     },
+    timeout: 180000, // 180秒超时
     headers: {
       'Content-Type': 'multipart/form-data',
       Authorization: `Bearer ${process.env.VCORP_AI_KEY}`,
