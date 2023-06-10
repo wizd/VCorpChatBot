@@ -1,6 +1,7 @@
 export type VwsMessageType =
   | "text"
   | "image"
+  | "video"
   | "audio"
   | "speech" // while recording, send chunks to server
   | "blob"
@@ -36,6 +37,11 @@ export interface VwsImageMessage extends VwsBaseMessage {
   url: string; // 图片 URL
 }
 
+export interface VwsVideoMessage extends VwsBaseMessage {
+  type: "video";
+  url: string; // 视频 URL
+}
+
 export interface VwsAudioMessage extends VwsBaseMessage {
   type: "audio";
   fmt?: string;  // silk, mp3, wav, etc.
@@ -45,6 +51,7 @@ export interface VwsAudioMessage extends VwsBaseMessage {
 
 export interface VwsBlobMessage extends VwsBaseMessage {
   type: "blob";
+  fn: string; // 文件名
   data: ArrayBuffer; // Blob 数据
 }
 
@@ -62,6 +69,7 @@ export interface VwsJsonMessage extends VwsBaseMessage {
 export type VwsMessage =
   | VwsTextMessage
   | VwsImageMessage
+  | VwsVideoMessage
   | VwsAudioMessage
   | VwsSpeechMessage
   | VwsBlobMessage
@@ -78,6 +86,12 @@ export function isVwsImageMessage(
   message: VwsMessage
 ): message is VwsImageMessage {
   return message.type === "image";
+}
+
+export function isVwsVideoMessage(
+  message: VwsMessage
+): message is VwsVideoMessage {
+  return message.type === "video";
 }
 
 export function isVwsAudioMessage(

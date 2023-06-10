@@ -5,14 +5,16 @@ import {
   MessageInterface,
   WechatyInterface,
 } from 'wechaty/impls';
-import { msgRootDispatcher } from './messageDispatcher.js';
+import { downloadImage, msgRootDispatcher } from './messageDispatcher.js';
 import { Message } from 'wechaty';
 import ChatClient from './chatClient.js';
 import {
   VwsAudioMessage,
   VwsTextMessage,
+  VwsVideoMessage,
   isVwsAudioMessage,
   isVwsTextMessage,
+  isVwsVideoMessage,
 } from './wsproto.js';
 import QRCode from 'qrcode-terminal';
 import { FileBox } from 'file-box';
@@ -136,7 +138,14 @@ function ConnectWebsocket() {
           };
         }
 
-        const message = await sendMessage(thebot, audmsg.dst, fileBox);
+        const message = await sendMessage(thebot, audmsg.dst, fileBox);      
+      } else if (isVwsVideoMessage(vmsg)) {
+        const vidmsg = vmsg as VwsVideoMessage;
+
+        // try to download the video
+        const data = await downloadImage(vidmsg.url);
+        const fileBox = FileBox.fromBuffer(toBuffer(data), 'video.mp4');
+        const message = await sendMessage(thebot, vidmsg.dst, fileBox);
       }
     } catch (err) {
       console.log('error in cc.onNewMessage: ', err);

@@ -10,10 +10,11 @@ import { FileBox, FileBoxInterface } from 'file-box';
 import axios from 'axios';
 import { parseHistoryXml } from './chatHistMsg.js';
 import ChatClient from './chatClient.js';
-import { VwsSystemMessage } from './wsproto.js';
+import { VwsBlobMessage, VwsImageMessage, VwsSystemMessage } from './wsproto.js';
 import { MiniProgram, UrlLink } from 'wechaty';
 import { VwsAudioMessage } from './wsproto.js';
 import { MODE } from '../index.js';
+import { uploadFile } from './fileUploader.js';
 
 const bypassMsgTypes = [4, 13];
 
@@ -33,23 +34,64 @@ export const msgRootDispatcher = async (
     }
     // 图片消息
     case PUPPET.types.Message.Image: {
-      const messageImage = await message.toImage();
+      const file = await message.toFileBox();
+      console.log("Image File is: ", file);
 
-      // 缩略图
-      const thumbImage = await messageImage.thumbnail();
-      const thumbImageData = await thumbImage.toBuffer();
-      // thumbImageData: 缩略图图片二进制数据
+      const blob: Buffer = await file.toBuffer();      
 
-      // 大图
-      const hdImage = await messageImage.hd();
-      const hdImageData = await hdImage.toBuffer();
-      // 大图图片二进制数据
+      await uploadFile("wx." + file.name, file.mediaType, blob, message.payload?.talkerId ?? '');
+      // send to humine
+      // const blobmsg: VwsBlobMessage = {
+      //   id: new Date().getTime().toString(),
+      //   src: message.payload?.talkerId ?? '',
+      //   dst: 'humine',
+      //   time: new Date().getTime(),
+      //   type: "blob",
+      //   fn: file.name,
+      //   data: toArrayBuffer(blob),
+      // };
+      // cc.sendChatMessage(blobmsg);
 
-      // 原图
-      const artworkImage = await messageImage.artwork();
-      const artworkImageData = await artworkImage.toBuffer();
+      // const messageImage = await message.toImage();
+
+      // // 缩略图
+      // try
+      // {
+      //   const thumbImage = await messageImage.thumbnail();
+      //   const thumbImageData = await thumbImage.toBuffer();
+      // }
+      // catch(err) {
+      //   console.log("get small pic error:", err);
+      // }
+
+      // // thumbImageData: 缩略图图片二进制数据
+
+      // // 大图
+      // try
+      // {
+      //   const hdImage = await messageImage.hd();
+      //   const hdImageData = await hdImage.toBuffer();
+      // }
+      // catch(err) {
+      //   console.log("get big pic error:", err);
+      // }
+      // // 大图图片二进制数据
+
+      // // 原图
+      // try
+      // {
+      //   const artworkImage = await messageImage.artwork();
+      //   const artworkImageData = await artworkImage.toBuffer();
+      // }
+      // catch(err) {
+      //   console.log("get art pic error:", err);
+      // }
+
       // artworkImageData: 原图图片二进制数据
 
+      
+
+      console.log("got an image!");
       break;
     }
     // 链接卡片消息
@@ -329,15 +371,19 @@ function extractFilenameFromImageUrl(url: string): string {
   return filename;
 }
 
-async function downloadImage(url: string): Promise<Buffer> {
+const customAxiosInstance = axios.create({
+  timeout: 90000,
+});
+
+export async function downloadImage(url: string): Promise<Buffer> {
   try {
     // for speed, replace default url to customized url
     const fastUrl = url;//.replace("https://mars.vcorp.ai", process.env.VCORP_AI_URL!.replace("/vc/v1", ""));
 
     console.log('downloading image: ', fastUrl);
-    const response = await axios.get(fastUrl, {
+
+    const response = await customAxiosInstance.get(fastUrl, {
       responseType: 'arraybuffer',
-      timeout: 90000, // 设置 90 秒超时
     });
 
     const buffer = Buffer.from(response.data, 'binary');
