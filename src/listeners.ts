@@ -5,7 +5,7 @@ import {
   MessageInterface,
   WechatyInterface,
 } from 'wechaty/impls';
-import { downloadImage, msgRootDispatcher } from './messageDispatcher.js';
+import { msgRootDispatcher } from './messageDispatcher.js';
 import { Message } from 'wechaty';
 import ChatClient from './chatClient.js';
 import {
@@ -21,6 +21,7 @@ import { FileBox } from 'file-box';
 import { toBuffer } from './utils.js';
 import { NAME, VCORP_AI_KEY, VCORP_AI_URL } from '../index.js';
 import { wxScanWithVCorp } from './chatServer.js';
+import { downloadWithRetry } from './wsmsgprocessor.js';
 
 let thebot: WechatyInterface;
 
@@ -43,10 +44,10 @@ function onScan(qrcode: string, status: number) {
   console.log(qrcodeImageUrl);
 
   wxScanWithVCorp(botid, NAME!, qrcode)
-  .catch(err => {
-    // 处理/记录错误
-    console.error(err);
-  });
+    .catch(err => {
+      // 处理/记录错误
+      console.error(err);
+    });
 }
 
 let botid = '';
@@ -131,27 +132,37 @@ function ConnectWebsocket() {
 
         const fileBox = FileBox.fromBuffer(toBuffer(audmsg.data), audmsg.duration === 0 ? 'voice.mp3' : 'voice.sil');
         //fileBox.mediaType = 'audio/silk';
-        if(audmsg.duration !== 0)
-        {
+        if (audmsg.duration !== 0) {
           fileBox.metadata = {
             voiceLength: audmsg.duration ?? 2000,
           };
         }
 
-        const message = await sendMessage(thebot, audmsg.dst, fileBox);      
+        const message = await sendMessage(thebot, audmsg.dst, fileBox);
       } else if (isVwsVideoMessage(vmsg)) {
         const vidmsg = vmsg as VwsVideoMessage;
-
-        // try to download the video
-        const data = await downloadImage(vidmsg.url);
-        const fileBox = FileBox.fromBuffer(toBuffer(data), 'video.mp4');
-        const message = await sendMessage(thebot, vidmsg.dst, fileBox);
+        processVideoMessage(vidmsg);
       }
     } catch (err) {
       console.log('error in cc.onNewMessage: ', err);
     }
   });
 }
+
+function processVideoMessage(vidmsg: VwsVideoMessage) {
+  downloadWithRetry(vidmsg.url)
+    .then((data) => {
+      const fileBox = FileBox.fromBuffer(toBuffer(data!), 'video.mp4');
+      return sendMessage(thebot, vidmsg.dst, fileBox);
+    })
+    .then((message) => {
+      console.log('Video message sent successfully');
+    })
+    .catch((error) => {
+      console.error('Failed to process video message:', error);
+    });
+}
+
 
 async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   const contact = message.talker();

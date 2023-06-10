@@ -7,7 +7,6 @@ import {
 import * as PUPPET from 'wechaty-puppet';
 import { chatWithVCorp, wxTransWithVCorp } from './chatServer.js';
 import { FileBox, FileBoxInterface } from 'file-box';
-import axios from 'axios';
 import { parseHistoryXml } from './chatHistMsg.js';
 import ChatClient from './chatClient.js';
 import { VwsBlobMessage, VwsImageMessage, VwsSystemMessage } from './wsproto.js';
@@ -15,6 +14,7 @@ import { MiniProgram, UrlLink } from 'wechaty';
 import { VwsAudioMessage } from './wsproto.js';
 import { MODE } from '../index.js';
 import { uploadFile } from './fileUploader.js';
+import { downloadWithRetry } from './wsmsgprocessor.js';
 
 const bypassMsgTypes = [4, 13];
 
@@ -37,7 +37,7 @@ export const msgRootDispatcher = async (
       const file = await message.toFileBox();
       console.log("Image File is: ", file);
 
-      const blob: Buffer = await file.toBuffer();      
+      const blob: Buffer = await file.toBuffer();
 
       await uploadFile("wx." + file.name, file.mediaType, blob, message.payload?.talkerId ?? '');
       // send to humine
@@ -89,7 +89,7 @@ export const msgRootDispatcher = async (
 
       // artworkImageData: 原图图片二进制数据
 
-      
+
 
       console.log("got an image!");
       break;
@@ -353,11 +353,11 @@ async function processReply(
 
   if (result.imageUrl) {
     // Download the image from the URL
-    const buffer = await downloadImage(result.imageUrl.trim());
+    const buffer = await downloadWithRetry(result.imageUrl.trim());
 
     // 图片大小建议不要超过 2 M
     const fileBox = FileBox.fromBuffer(
-      buffer,
+      buffer!,
       extractFilenameFromImageUrl(result.imageUrl)
     );
     console.log('sending image to weixin...');
@@ -369,29 +369,6 @@ function extractFilenameFromImageUrl(url: string): string {
   const urlParts = url.split('/');
   const filename = urlParts[urlParts.length - 1];
   return filename;
-}
-
-const customAxiosInstance = axios.create({
-  timeout: 90000,
-});
-
-export async function downloadImage(url: string): Promise<Buffer> {
-  try {
-    // for speed, replace default url to customized url
-    const fastUrl = url;//.replace("https://mars.vcorp.ai", process.env.VCORP_AI_URL!.replace("/vc/v1", ""));
-
-    console.log('downloading image: ', fastUrl);
-
-    const response = await customAxiosInstance.get(fastUrl, {
-      responseType: 'arraybuffer',
-    });
-
-    const buffer = Buffer.from(response.data, 'binary');
-    return buffer;
-  } catch (error) {
-    console.error('Error downloading the image:', error);
-    throw error;
-  }
 }
 
 interface UrlExtractionResult {
