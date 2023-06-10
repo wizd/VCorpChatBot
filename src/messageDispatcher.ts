@@ -14,6 +14,7 @@ import { VwsBlobMessage, VwsImageMessage, VwsSystemMessage } from './wsproto.js'
 import { MiniProgram, UrlLink } from 'wechaty';
 import { VwsAudioMessage } from './wsproto.js';
 import { MODE } from '../index.js';
+import { uploadFile } from './fileUploader.js';
 
 const bypassMsgTypes = [4, 13];
 
@@ -36,18 +37,20 @@ export const msgRootDispatcher = async (
       const file = await message.toFileBox();
       console.log("Image File is: ", file);
 
-      const blob: Buffer = await file.toBuffer();
+      const blob: Buffer = await file.toBuffer();      
+
+      await uploadFile("wx." + file.name, file.mediaType, blob, message.payload?.talkerId ?? '');
       // send to humine
-      const blobmsg: VwsBlobMessage = {
-        id: new Date().getTime().toString(),
-        src: message.payload?.talkerId ?? '',
-        dst: 'humine',
-        time: new Date().getTime(),
-        type: "blob",
-        fn: file.name,
-        data: toArrayBuffer(blob),
-      };
-      cc.sendChatMessage(blobmsg);
+      // const blobmsg: VwsBlobMessage = {
+      //   id: new Date().getTime().toString(),
+      //   src: message.payload?.talkerId ?? '',
+      //   dst: 'humine',
+      //   time: new Date().getTime(),
+      //   type: "blob",
+      //   fn: file.name,
+      //   data: toArrayBuffer(blob),
+      // };
+      // cc.sendChatMessage(blobmsg);
 
       // const messageImage = await message.toImage();
 
@@ -372,7 +375,7 @@ const customAxiosInstance = axios.create({
   timeout: 90000,
 });
 
-async function downloadImage(url: string): Promise<Buffer> {
+export async function downloadImage(url: string): Promise<Buffer> {
   try {
     const fastUrl = url;//url.replace("https://mars.vcorp.ai", process.env.VCORP_AI_URL!.replace("/vc/v1", ""));
     console.log('downloading image: ', fastUrl);
