@@ -178,8 +178,10 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
 }
 
 const listeners = [onScan, onLogout, onLogin, onFriendship, onMessage];
-export const bindListeners = (bot: WechatyInterface) => {
+export const startVcorp = () => {
   ConnectWebsocket();
+}
+export const bindListeners = (bot: WechatyInterface) => {
   thebot = bot;
   return bot
     .on('scan', onScan)

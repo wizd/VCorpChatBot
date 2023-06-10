@@ -1,20 +1,12 @@
 @echo off
 chcp 65001
 
-rem 下面是运行模式：配合padlocal时请用powerbot，完全为自己服务请用personal，作为bot提供公共服务请用pubbot
-set MODE=pubbot
-
-rem 下面是运行窗口标题名字：自己觉得清晰可记就行。
-set NAME="Some great name"
-
-rem 下面是你从微可AI引擎得到的API密钥，通常以bk_打头：
-set VCORP_AI_KEY=bk_......
-
-rem 如果是powerbot模式，必须有padlocal的key
-set PAD_LOCAL_KEY=puppet_padlocal_...
-
-rem 下面服务器地址默认不用改
-set VCORP_AI_URL=https://mars.vcorp.ai/vc/v1
+rem 获取命令行参数，如果不存在则使用默认值
+if "%1" == "" (set MODE=pubbot) else (set MODE=%1)
+if "%2" == "" (set NAME="Some great name") else (set NAME=%2)
+if "%3" == "" (set VCORP_AI_KEY=bk_......) else (set VCORP_AI_KEY=%3)
+if "%4" == "" (set PAD_LOCAL_KEY=puppet_padlocal_...) else (set PAD_LOCAL_KEY=%4)
+if "%5" == "" (set VCORP_AI_URL=https://mars.vcorp.ai/vc/v1) else (set VCORP_AI_URL=%5)
 
 :loop
 del chaty-wechat-bot.memory-card.json

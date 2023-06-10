@@ -1,5 +1,5 @@
 import { WechatyBuilder } from 'wechaty';
-import { bindListeners } from './src/listeners.js';
+import { bindListeners, startVcorp } from './src/listeners.js';
 import { PuppetPadlocal } from 'wechaty-puppet-padlocal';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -38,6 +38,7 @@ if (MODE === 'powerbot') {
     puppet,
   });
 
+  startVcorp();
   bindListeners(bot).start();
 }
 else {
@@ -45,6 +46,7 @@ else {
 
   const bot = WechatyBuilder.build();
 
+  startVcorp();
   bindListeners(bot).start();
 }
 
