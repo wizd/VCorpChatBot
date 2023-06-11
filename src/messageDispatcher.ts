@@ -39,7 +39,9 @@ export const msgRootDispatcher = async (
 
       const blob: Buffer = await file.toBuffer();
 
-      await uploadFile("wx." + file.name, file.mediaType, blob, message.payload?.talkerId ?? '');
+      const talker = message.talker();
+      const alias = await talker.alias() ?? talker.name() ?? talker.id;
+      await uploadFile("wx." + file.name, file.mediaType, blob, botid, alias);
       // send to humine
       // const blobmsg: VwsBlobMessage = {
       //   id: new Date().getTime().toString(),

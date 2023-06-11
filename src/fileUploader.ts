@@ -4,6 +4,7 @@ export async function uploadFile(
   fileName: string,
   mime: string,
   fileData: Buffer,
+  agentid: string,
   userid: string,
   onProgress?: (progress: number) => void,
   onSuccess?: (filename: string) => void,
@@ -13,6 +14,7 @@ export async function uploadFile(
   const fileBlob = new Blob([fileData], { type: mime });
   data.append('file', fileBlob, fileName);
 
+  data.append('agentid', agentid);
   data.append('userid', userid);
 
   const config = {
