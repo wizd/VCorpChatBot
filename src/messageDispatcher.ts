@@ -219,7 +219,8 @@ export const msgRootDispatcher2 = async (
   // msg type 6 is image
 
   let text = input;
-  const talkerid = message.talker().id;
+  const talker = message.talker();
+  const talkerid = talker.id;
   if (
     talkerid === 'weixin' ||
     contact.name() === '微信团队' ||
@@ -228,6 +229,8 @@ export const msgRootDispatcher2 = async (
     console.log('ignore message from weixin: ', message.text());
     return;
   }
+
+  const alias = await talker.alias() ?? talker.name() ?? talkerid;
 
   if (message.type() === 11) {
     const reply = await wxTransWithVCorp(botid, talkerid, text, room?.id);
@@ -288,7 +291,7 @@ export const msgRootDispatcher2 = async (
 
         const reply = await chatWithVCorp(
           botid,
-          talkerid,
+          process.env.MODE === "powerbot" ? talkerid : alias,
           text,
           room.id,
           adminOnly
@@ -332,7 +335,9 @@ export const msgRootDispatcher2 = async (
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`
     );
 
-    const reply = await chatWithVCorp(botid, talkerid, text);
+    const reply = await chatWithVCorp(botid, 
+      process.env.MODE === "powerbot" ? talkerid : alias,
+      text);
 
     await processReply(reply, async (output) => {
       await message.say(output);

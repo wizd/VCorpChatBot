@@ -59,7 +59,7 @@ async function onLogin(user: ContactSelfInterface) {
   // const contactMeLatest = (await thebot.Contact.find({ id: user.id }))!;
   // console.log('My latest user name is: ', contactMeLatest.name());
 
-  botid = user.id;
+  botid = process.env.MODE === "powerbot" ? user.id : user.name();
 }
 function onLogout(user: ContactSelfInterface) {
   console.log(`${user} 已经登出`);
@@ -175,8 +175,8 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
     console.log('message is: ', message);
 
     // get talkerid
-    const talkerid = message.talker().id;
-    console.log('talkerid is: ', talkerid);
+    const talker = message.talker();
+    console.log('talker is: ', talker);
 
     await msgRootDispatcher(cc, bot, botid, message, contact, room);
   } catch (err) {
