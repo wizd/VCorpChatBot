@@ -13,6 +13,7 @@ import {
   VwsTextMessage,
   VwsVideoMessage,
   isVwsAudioMessage,
+  isVwsSystemMessage,
   isVwsTextMessage,
   isVwsVideoMessage,
 } from './wsproto.js';
@@ -60,6 +61,8 @@ async function onLogin(user: ContactSelfInterface) {
   // console.log('My latest user name is: ', contactMeLatest.name());
 
   botid = process.env.MODE === "powerbot" ? user.id : user.name();
+
+  cc.register(botid);
 }
 function onLogout(user: ContactSelfInterface) {
   console.log(`${user} 已经登出`);
@@ -137,6 +140,7 @@ function ConnectWebsocket() {
     VCORP_AI_URL!.replace('/vc/v1', ''),
     VCORP_AI_KEY!
   );
+
   cc.onNewMessage(async (vmsg) => {
     try {
       console.log('received message from AI engine: ', vmsg);

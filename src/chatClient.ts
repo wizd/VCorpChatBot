@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { VwsMessage } from './wsproto';
+import { VwsMessage, VwsSystemMessage } from './wsproto';
 
 // 定义异步回调类型
 export type MessageCallback = (message: VwsMessage) => void | Promise<void>;
@@ -64,6 +64,20 @@ class ChatClient {
   // 断开与服务器的连接
   public disconnect(): void {
     this.socket.disconnect();
+  }
+
+  public register(botid: string) {
+      // register
+    const hello : VwsSystemMessage = {
+      id: new Date().getTime().toString(),
+      src: botid,
+      dst: "Humine",
+      type: "system",
+      time: new Date().getTime(),
+      cmd: "botStart",
+      note: "hora! the broker is online!"
+    };
+    this.sendChatMessage(hello);
   }
 }
 

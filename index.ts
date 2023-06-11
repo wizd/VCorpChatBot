@@ -39,7 +39,8 @@ if (MODE === 'powerbot') {
   });
 
   startVcorp();
-  bindListeners(bot).start();
+
+  await bindListeners(bot).start();  
 }
 else {
   console.log("Using default settings.");
@@ -47,7 +48,8 @@ else {
   const bot = WechatyBuilder.build();
 
   startVcorp();
-  bindListeners(bot).start();
+  
+  await bindListeners(bot).start();
 }
 
 

@@ -30,7 +30,12 @@ export const msgRootDispatcher = async (
     // 文本消息
     case PUPPET.types.Message.Text: {
       const text = message.text();
-      return await msgRootDispatcher2(cc, bot, botid, message, contact, room);
+      try{
+        return await msgRootDispatcher2(cc, bot, botid, message, contact, room);
+      }
+      catch(err) {
+        console.log("Fatal error in msgRootDispatcher2!!!", err);
+      }      
     }
     // 图片消息
     case PUPPET.types.Message.Image: {
@@ -174,7 +179,12 @@ export const msgRootDispatcher = async (
     }
     // 其他消息
     default:
-      return await msgRootDispatcher2(cc, bot, botid, message, contact, room);
+      try{
+        return await msgRootDispatcher2(cc, bot, botid, message, contact, room);
+      }
+      catch(err) {
+        console.log("Fatal error in msgRootDispatcher2!!!", err);
+      }
       break;
   }
 };
@@ -235,7 +245,7 @@ export const msgRootDispatcher2 = async (
   const alias = await talker.alias() ?? talker.name() ?? talkerid;
 
   if (message.type() === 11) {
-    const reply = await wxTransWithVCorp(botid, talkerid, text, room?.id);
+    const reply = await wxTransWithVCorp(botid, alias, text, room?.id);
     //await moneyTransferHandler(ssoid, message, input, contact, room, botid);
     if (reply.status === 'success') {
       if (reply.messages[0].content !== '') {
