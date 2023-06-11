@@ -104,25 +104,22 @@ const sendMessage = async (
   toUserId: string,
   payload: any
 ): Promise<Message | null> => {
-  const toContact = await bot.Contact.find({ id: toUserId });
-  if (toContact === undefined) {
-    console.log('contact not found: ', toUserId);
-    return null;
+  if (process.env.MODE === "powerbot") {
+    const toContact = await bot.Contact.find({ id: toUserId });
+    if (toContact === undefined) {
+      console.log('contact not found: ', toUserId);
+      return null;
+    }
+    return await sendMessageToContact(bot, toContact, payload);
   }
-  return await sendMessageToContact(bot, toContact, payload);
-};
-
-const sendMessageToName = async (
-  bot: WechatyInterface,
-  toName: string,
-  payload: any
-): Promise<Message | null> => {
-  const toContact = await bot.Contact.find({ alias: toName }) ?? await bot.Contact.find({ name: toName });
-  if (toContact === undefined) {
-    console.log('contact not found: ', toName);
-    return null;
+  else {
+    const toContact = await bot.Contact.find({ alias: toUserId }) ?? await bot.Contact.find({ name: toUserId });
+    if (toContact === undefined) {
+      console.log('contact not found: ', toUserId);
+      return null;
+    }
+    return await sendMessageToContact(bot, toContact, payload);
   }
-  return await sendMessageToContact(bot, toContact, payload);
 };
 
 const sendMessageToContact = async (
@@ -145,10 +142,10 @@ function ConnectWebsocket() {
       console.log('received message from AI engine: ', vmsg);
       if (isVwsTextMessage(vmsg)) {
         const tmsg = vmsg as VwsTextMessage;
-        console.log('Send to', tmsg.dst, 'content: ', tmsg.content);
+        console.log('Send to', tmsg.dst, 'content: ', tmsg);
 
         // get user's id from user's name
-        await sendMessageToName(thebot, vmsg.dst, tmsg.content);
+        await sendMessage(thebot, vmsg.dst, tmsg.content);
       } else if (isVwsAudioMessage(vmsg)) {
         const audmsg = vmsg as VwsAudioMessage;
         console.log('duration is: ', audmsg.duration);
@@ -161,7 +158,7 @@ function ConnectWebsocket() {
           };
         }
 
-        const message = await sendMessageToName(thebot, audmsg.dst, fileBox);
+        const message = await sendMessage(thebot, audmsg.dst, fileBox);
       } else if (isVwsVideoMessage(vmsg)) {
         const vidmsg = vmsg as VwsVideoMessage;
         processVideoMessage(vidmsg);
@@ -176,7 +173,7 @@ function processVideoMessage(vidmsg: VwsVideoMessage) {
   downloadWithRetry(vidmsg.url)
     .then((data) => {
       const fileBox = FileBox.fromBuffer(toBuffer(data!), 'video.mp4');
-      return sendMessageToName(thebot, vidmsg.dst, fileBox);
+      return sendMessage(thebot, vidmsg.dst, fileBox);
     })
     .then((message) => {
       console.log('Video message sent successfully');
