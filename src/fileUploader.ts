@@ -16,6 +16,7 @@ export async function uploadFile(
 
   data.append('agentid', agentid);
   data.append('userid', userid);
+  data.append('app', 'weixin');
 
   const config = {
     onUploadProgress: (progressEvent: AxiosProgressEvent) => {
