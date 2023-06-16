@@ -5,11 +5,13 @@ import {
   MessageInterface,
   WechatyInterface,
 } from 'wechaty/impls';
+import pm2 from 'pm2';
 import { msgRootDispatcher } from './messageDispatcher.js';
 import { Contact, Message } from 'wechaty';
 import ChatClient from './chatClient.js';
 import {
   VwsAudioMessage,
+  VwsSystemMessage,
   VwsTextMessage,
   VwsVideoMessage,
   isVwsAudioMessage,
@@ -166,6 +168,87 @@ function ConnectWebsocket() {
       } else if (isVwsVideoMessage(vmsg)) {
         const vidmsg = vmsg as VwsVideoMessage;
         processVideoMessage(vidmsg);
+      } else if(isVwsSystemMessage(vmsg)) {
+        const sysmsg = vmsg as VwsSystemMessage;
+        if(sysmsg.dst === "pm2") {
+          if(sysmsg.cmd === "list"){
+            pm2.list((err, list) => {
+              console.log(err, list)
+  
+              const respmsg: VwsSystemMessage = {
+                id: sysmsg.id + 'r',
+                src: sysmsg.dst,
+                dst: sysmsg.src,
+                time: new Date().getTime(),
+                type: "system",
+                cmd: sysmsg.cmd + "-resp",
+                note: JSON.stringify(list)
+              };
+              cc.sendChatMessage(respmsg);
+            });
+          }
+          else if(sysmsg.cmd.startsWith("create ")){
+            const options = JSON.parse(sysmsg.cmd.replace("create ", ""));
+            options.cwd = process.cwd();
+            pm2.start(options, (err, proc) => {
+              const respmsg: VwsSystemMessage = {
+                id: sysmsg.id + 'r',
+                src: sysmsg.dst,
+                dst: sysmsg.src,
+                time: new Date().getTime(),
+                type: "system",
+                cmd: sysmsg.cmd + "-resp",
+                note: JSON.stringify(proc)
+              };
+              cc.sendChatMessage(respmsg);
+            });
+          }
+          else if(sysmsg.cmd.startsWith("start ")){
+            pm2.start(sysmsg.cmd.replace("start ", ""), (err, proc) => {
+              const respmsg: VwsSystemMessage = {
+                id: sysmsg.id + 'r',
+                src: sysmsg.dst,
+                dst: sysmsg.src,
+                time: new Date().getTime(),
+                type: "system",
+                cmd: sysmsg.cmd + "-resp",
+                note: JSON.stringify(proc)
+              };
+              cc.sendChatMessage(respmsg);
+            });
+          }
+          else if(sysmsg.cmd.startsWith("stop ")){
+            pm2.stop(sysmsg.cmd.replace("stop ", ""), (err, proc) => {
+              const respmsg: VwsSystemMessage = {
+                id: sysmsg.id + 'r',
+                src: sysmsg.dst,
+                dst: sysmsg.src,
+                time: new Date().getTime(),
+                type: "system",
+                cmd: sysmsg.cmd + "-resp",
+                note: JSON.stringify(proc)
+              };
+              cc.sendChatMessage(respmsg);
+            });
+          }
+          else if(sysmsg.cmd.startsWith("delete ")){
+            pm2.delete(sysmsg.cmd.replace("delete ", ""), (err, proc) => {
+              const respmsg: VwsSystemMessage = {
+                id: sysmsg.id + 'r',
+                src: sysmsg.dst,
+                dst: sysmsg.src,
+                time: new Date().getTime(),
+                type: "system",
+                cmd: sysmsg.cmd + "-resp",
+                note: JSON.stringify(proc)
+              };
+              cc.sendChatMessage(respmsg);
+            });
+          }
+          else{
+            console.log("unsupported pm2 command: ", sysmsg.cmd);
+          }
+        }
       }
     } catch (err) {
       console.log('error in cc.onNewMessage: ', err);
