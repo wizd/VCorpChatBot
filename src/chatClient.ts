@@ -10,6 +10,7 @@ class ChatClient {
   private socket: Socket;
   private messageSubscribers: Set<MessageCallback> = new Set();
   private autoReconnectInterval = 5000; // 设置自动重连时间间隔，单位：毫秒
+  private heartbeatTimer: NodeJS.Timer;
 
   onNewMessage(callback: MessageCallback): void {
     this.messageSubscribers.add(callback);
@@ -36,12 +37,12 @@ class ChatClient {
     this.socket.on('smsg', async (message: VwsMessage) => {
       console.log('Received chat message from server:', message);
       // 调用回调函数（如果已提供）
-      try{
+      try {
         for (const subscriber of this.messageSubscribers) {
           subscriber(message);
         }
       }
-      catch(err) {
+      catch (err) {
         console.log("error process message from server:", err);
       }
     });
@@ -54,6 +55,27 @@ class ChatClient {
     this.socket.on('connect', () => {
       console.log('Connected to chat server: ', serverUrl);
     });
+
+    // 自定义心跳消息
+    const customHeartbeatInterval = 25000; // 25 秒
+
+    // 创建一个定时器，每 25 秒向服务器发送一次自定义心跳消息
+    this.heartbeatTimer = setInterval(() => {
+      const customHeartbeatMessage: VwsSystemMessage = {
+        id: new Date().getTime().toString(),
+        src: "weixinbot",
+        dst: "humine",
+        time: new Date().getTime(),
+        type: "system",
+        cmd: "heartbeat",
+        note: ""
+      };
+      try {
+        this.sendChatMessage(customHeartbeatMessage);
+      }
+      catch (e) { console.log("Error send heartbeating: ", e) }
+      console.log(`Sent custom heartbeat message: ${customHeartbeatMessage}`);
+    }, customHeartbeatInterval);
   }
 
   // 向服务器发送聊天消息
@@ -67,8 +89,8 @@ class ChatClient {
   }
 
   public register(botid: string) {
-      // register
-    const hello : VwsSystemMessage = {
+    // register
+    const hello: VwsSystemMessage = {
       id: new Date().getTime().toString(),
       src: botid,
       dst: "Humine",
