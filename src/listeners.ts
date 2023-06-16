@@ -27,6 +27,7 @@ import { wxScanWithVCorp } from './chatServer.js';
 import { downloadWithRetry } from './wsmsgprocessor.js';
 
 let thebot: WechatyInterface;
+export let botid = '';
 
 // const sendMessage = async (
 //   bot: WechatyInterface,
@@ -53,7 +54,6 @@ function onScan(qrcode: string, status: number) {
     });
 }
 
-let botid = '';
 async function onLogin(user: ContactSelfInterface) {
   console.log(`User ${user} logged in`);
   console.log('my user id is: ', user.id);

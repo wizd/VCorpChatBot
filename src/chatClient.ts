@@ -1,5 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { VwsMessage, VwsSystemMessage } from './wsproto';
+import { botid } from './listeners.js';
 
 // 定义异步回调类型
 export type MessageCallback = (message: VwsMessage) => void | Promise<void>;
@@ -63,7 +64,7 @@ class ChatClient {
     this.heartbeatTimer = setInterval(() => {
       const customHeartbeatMessage: VwsSystemMessage = {
         id: new Date().getTime().toString(),
-        src: "weixinbot",
+        src: botid,
         dst: "humine",
         time: new Date().getTime(),
         type: "system",
@@ -74,7 +75,7 @@ class ChatClient {
         this.sendChatMessage(customHeartbeatMessage);
       }
       catch (e) { console.log("Error send heartbeating: ", e) }
-      console.log(`Sent custom heartbeat message: ${customHeartbeatMessage}`);
+      //console.log(`Sent custom heartbeat message: ${customHeartbeatMessage}`);
     }, customHeartbeatInterval);
   }
 
