@@ -109,23 +109,49 @@ const sendMessage = async (
   toUserId: string,
   payload: any
 ): Promise<Message | null> => {
-  if (process.env.MODE === "powerbot") {
-    const toContact = await bot.Contact.find({ id: toUserId });
-    if (toContact === undefined) {
-      console.log('contact not found: ', toUserId);
-      return null;
+  const secs = toUserId.split('/');
+  if(secs.length === 1)
+  {
+    if (process.env.MODE === "powerbot") {
+      const toContact = await bot.Contact.find({ id: toUserId });
+      if (toContact === undefined) {
+        console.log('contact not found: ', toUserId);
+        return null;
+      }
+      return await sendMessageToContact(bot, toContact, payload);
     }
-    return await sendMessageToContact(bot, toContact, payload);
+    else {
+      const toContact = await bot.Contact.find({ alias: toUserId }) ?? await bot.Contact.find({ name: toUserId });
+      if (toContact === undefined) {
+        console.log('contact not found: ', toUserId);
+        return null;
+      }
+      return await sendMessageToContact(bot, toContact, payload);
+    }
   }
-  else {
-    const toContact = await bot.Contact.find({ alias: toUserId }) ?? await bot.Contact.find({ name: toUserId });
-    if (toContact === undefined) {
-      console.log('contact not found: ', toUserId);
-      return null;
-    }
-    return await sendMessageToContact(bot, toContact, payload);
+  else
+  {
+    // send to room with @
+    await sendMessageToRoom(bot, secs[0], secs[1], payload);
+    return null;
   }
 };
+
+const sendMessageToRoom = async (
+  bot: WechatyInterface,
+  toUser: string,
+  toRoom: string,
+  payload: any
+): Promise<Message | null> => {
+  const room = await bot.Room.find({id: toRoom});
+  if(room){
+    await room.say(`@${toUser} ${payload}`);
+  }
+  else{
+    console.log(`Room not found! for ${toRoom}`);
+  }
+  return null;
+}
 
 const sendMessageToContact = async (
   bot: WechatyInterface,
