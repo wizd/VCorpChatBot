@@ -30,12 +30,12 @@ export const msgRootDispatcher = async (
     // 文本消息
     case PUPPET.types.Message.Text: {
       const text = message.text();
-      try{
+      try {
         return await msgRootDispatcher2(cc, bot, botid, message, contact, room);
       }
-      catch(err) {
+      catch (err) {
         console.log("Fatal error in msgRootDispatcher2!!!", err);
-      }      
+      }
     }
     // 图片消息
     case PUPPET.types.Message.Image: {
@@ -179,10 +179,10 @@ export const msgRootDispatcher = async (
     }
     // 其他消息
     default:
-      try{
+      try {
         return await msgRootDispatcher2(cc, bot, botid, message, contact, room);
       }
-      catch(err) {
+      catch (err) {
         console.log("Fatal error in msgRootDispatcher2!!!", err);
       }
       break;
@@ -278,7 +278,8 @@ export const msgRootDispatcher2 = async (
   if (room) {
     try {
       const adminOnly = false;
-      const idcount = await room.memberAll();
+      console.log("work in room");
+      //const idcount = await room.memberAll();
       // if (idcount.length < 50 && room?.id !== BOT_ADMIN_ROOMID) {
       //   console.log('room member count is less than 50, ignore message');
       //   adminOnly = true;
@@ -347,7 +348,7 @@ export const msgRootDispatcher2 = async (
       `${contact} call gpt api @${new Date().toLocaleString()} with text: ${text}`
     );
 
-    const reply = await chatWithVCorp(botid, 
+    const reply = await chatWithVCorp(botid,
       process.env.MODE === "powerbot" ? talkerid : alias,
       text);
 
