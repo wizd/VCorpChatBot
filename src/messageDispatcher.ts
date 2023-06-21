@@ -289,12 +289,12 @@ export const msgRootDispatcher2 = async (
       console.log('Bot current user name is: ', bot.currentUser.name());
       const selfName = bot.currentUser.name();
 
-      const tolist = await message.mentionList();
+      //const tolist = await message.mentionList();
 
       console.log(`room topic is : ${topic}, ${text}`);
       if (
-        text.indexOf(`@${selfName}`) !== -1 ||
-        tolist.find((a) => a.id === botid)
+        text.indexOf(`@${selfName}`) !== -1// ||
+        //tolist.find((a) => a.id === botid)
       ) {
         text = text.replace(`@${selfName}`, '').trim();
         if (!text) return;
