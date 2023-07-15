@@ -12,7 +12,7 @@ export async function uploadFile(
   const data = new FormData();
 
   const fileBlob = new Blob([fileData], { type: mime });
-  data.append('file', fileBlob, fileName);
+  data.append('file', fileBlob, encodeURIComponent(fileName));
 
   data.append('agentid', agentid);
   data.append('userid', userid);

@@ -302,14 +302,14 @@ async function onMessage(message: MessageInterface, bot: WechatyInterface) {
   const room = message.room();
 
   try {
-    console.log('contact is: ', contact);
-    //console.log("contact ID is: ", contact.id);
-    console.log('room is: ', room);
-    console.log('message is: ', message);
+    // console.log('contact is: ', contact);
+    // //console.log("contact ID is: ", contact.id);
+    // console.log('room is: ', room);
+    // console.log('message is: ', message);
 
     // get talkerid
     const talker = message.talker();
-    console.log('talker is: ', talker);
+    //console.log('talker is: ', talker);
 
     await msgRootDispatcher(cc, bot, botid, message, contact, room);
   } catch (err) {

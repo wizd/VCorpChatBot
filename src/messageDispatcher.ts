@@ -15,6 +15,7 @@ import { VwsAudioMessage } from './wsproto.js';
 import { MODE } from '../index.js';
 import { uploadFile } from './fileUploader.js';
 import { downloadWithRetry } from './wsmsgprocessor.js';
+import * as fs from 'fs';
 
 const bypassMsgTypes = [4, 13];
 
@@ -40,8 +41,6 @@ export const msgRootDispatcher = async (
     // 图片消息
     case PUPPET.types.Message.Image: {
       const file = await message.toFileBox();
-      console.log("Image File is: ", file);
-
       const blob: Buffer = await file.toBuffer();
 
       const talker = message.talker();
@@ -170,10 +169,16 @@ export const msgRootDispatcher = async (
     }
     // 文件消息
     case PUPPET.types.Message.Attachment: {
-      const attachFileBox = await message.toFileBox();
+      const file = await message.toFileBox();
+      // const str = await file.toBase64();
+      // const fn = "c:/tmp/aaa.xxx";
+      // await file.toFile(fn);
 
-      //const attachData = await attachFileBox.toBuffer();
-      // attachData: 文件二进制数据
+
+      const blob: Buffer = await file.toBuffer();
+      const talker = message.talker();
+      const alias = await talker.alias() ?? talker.name() ?? talker.id;
+      await uploadFile(file.name, file.mediaType, blob, botid, alias);
 
       break;
     }
@@ -188,6 +193,18 @@ export const msgRootDispatcher = async (
       break;
   }
 };
+
+export function readFileAsBuffer(filePath: string): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        fs.readFile(filePath, (err, data) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data);
+            }
+        });
+    });
+}
 
 function toArrayBuffer(buffer: Buffer) {
   const arrayBuffer = new ArrayBuffer(buffer.length);

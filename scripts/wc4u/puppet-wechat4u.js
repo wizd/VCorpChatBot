@@ -540,14 +540,14 @@ export class PuppetWechat4u extends PUPPET.Puppet {
                  * 视频消息
                  */
                 // console.log('视频消息，保存到本地')
-                return FileBox.fromStream((await this.wechat4u.getVideo(rawPayload.MsgId)).data, `message-${id}-video.mp4`);
+                return FileBox.fromBuffer((await this.wechat4u.getVideo(rawPayload.MsgId)).data, `message-${id}-video.mp4`);
             case PUPPET.types.Message.Attachment:
                 if (rawPayload.AppMsgType === 6) {
                     /**
                      * 文件消息
                      */
                     // console.log('文件消息，保存到本地')
-                    return FileBox.fromStream((await this.wechat4u.getDoc(rawPayload.FromUserName, rawPayload.MediaId, rawPayload.FileName)).data, rawPayload.FileName);
+                    return FileBox.fromBuffer((await this.wechat4u.getDoc(rawPayload.FromUserName, rawPayload.MediaId, rawPayload.FileName)).data, rawPayload.FileName);
                 }
                 break;
             default:
