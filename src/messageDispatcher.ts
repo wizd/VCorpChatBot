@@ -43,8 +43,7 @@ export const msgRootDispatcher = async (
       const file = await message.toFileBox();
       const blob: Buffer = await file.toBuffer();
 
-      const talker = message.talker();
-      const alias = await talker.alias() ?? talker.name() ?? talker.id;
+      const alias = await getTalkerId(message);
       await uploadFile("wx." + file.name, file.mediaType, blob, botid, alias);
       // send to humine
       // const blobmsg: VwsBlobMessage = {
@@ -176,8 +175,7 @@ export const msgRootDispatcher = async (
 
 
       const blob: Buffer = await file.toBuffer();
-      const talker = message.talker();
-      const alias = await talker.alias() ?? talker.name() ?? talker.id;
+      const alias = await getTalkerId(message);
       await uploadFile(file.name, file.mediaType, blob, botid, alias);
 
       break;
@@ -195,15 +193,15 @@ export const msgRootDispatcher = async (
 };
 
 export function readFileAsBuffer(filePath: string): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-        fs.readFile(filePath, (err, data) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(data);
-            }
-        });
+  return new Promise((resolve, reject) => {
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
     });
+  });
 }
 
 function toArrayBuffer(buffer: Buffer) {
@@ -213,6 +211,18 @@ function toArrayBuffer(buffer: Buffer) {
     view[i] = buffer[i];
   }
   return arrayBuffer;
+}
+
+async function getTalkerId(message: MessageInterface) {
+  const talker = message.talker();
+  let alias = await talker.alias();
+  if (!alias || alias.trim() === '') {
+    alias = await talker.name();
+    if (!alias || alias.trim() === '') {
+      alias = talker.id;
+    }
+  }
+  return alias;
 }
 
 export const msgRootDispatcher2 = async (
@@ -232,7 +242,7 @@ export const msgRootDispatcher2 = async (
     //return;
   }
 
-  if (message.type() === 13) {
+  if (message.type() === 13 || message.type() === 0) {
     // notify from weixin that you have a pending transfer
     return;
   }
@@ -259,7 +269,7 @@ export const msgRootDispatcher2 = async (
     return;
   }
 
-  const alias = await talker.alias() ?? talker.name() ?? talkerid;
+  const alias = await getTalkerId(message);
 
   if (message.type() === 11) {
     const reply = await wxTransWithVCorp(botid, alias, text, room?.id);
@@ -366,7 +376,8 @@ export const msgRootDispatcher2 = async (
     );
 
     const reply = await chatWithVCorp(botid,
-      process.env.MODE === "powerbot" ? talkerid : alias,
+      //process.env.MODE === "powerbot" ? talkerid : alias,
+      alias,
       text);
 
     await processReply(reply, async (output) => {
