@@ -331,7 +331,8 @@ export const msgRootDispatcher2 = async (
 
         const reply = await chatWithVCorp(
           botid,
-          process.env.MODE === "powerbot" ? talkerid : alias,
+          alias,
+          //process.env.MODE === "powerbot" ? talkerid : alias,
           text,
           room.id,
           adminOnly
