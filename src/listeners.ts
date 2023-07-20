@@ -110,27 +110,25 @@ const sendMessage = async (
   payload: any
 ): Promise<Message | null> => {
   const secs = toUserId.split('/');
-  if(secs.length === 1)
-  {
-    if (process.env.MODE === "powerbot") {
-      const toContact = await bot.Contact.find({ id: toUserId });
-      if (toContact === undefined) {
-        console.log('contact not found: ', toUserId);
-        return null;
-      }
-      return await sendMessageToContact(bot, toContact, payload);
+  if (secs.length === 1) {
+    // if (process.env.MODE === "powerbot") {
+    //   const toContact = await bot.Contact.find({ id: toUserId });
+    //   if (toContact === undefined) {
+    //     console.log('contact not found: ', toUserId);
+    //     return null;
+    //   }
+    //   return await sendMessageToContact(bot, toContact, payload);
+    // }
+    // else {
+    const toContact = await bot.Contact.find({ alias: toUserId }) ?? await bot.Contact.find({ name: toUserId });
+    if (toContact === undefined) {
+      console.log('contact not found: ', toUserId);
+      return null;
     }
-    else {
-      const toContact = await bot.Contact.find({ alias: toUserId }) ?? await bot.Contact.find({ name: toUserId });
-      if (toContact === undefined) {
-        console.log('contact not found: ', toUserId);
-        return null;
-      }
-      return await sendMessageToContact(bot, toContact, payload);
-    }
+    return await sendMessageToContact(bot, toContact, payload);
+    //}
   }
-  else
-  {
+  else {
     // send to room with @
     await sendMessageToRoom(bot, secs[0], secs[1], payload);
     return null;
@@ -143,11 +141,11 @@ const sendMessageToRoom = async (
   toRoom: string,
   payload: any
 ): Promise<Message | null> => {
-  const room = await bot.Room.find({id: toRoom});
-  if(room){
+  const room = await bot.Room.find({ id: toRoom });
+  if (room) {
     await room.say(`@${toUser} ${payload}`);
   }
-  else{
+  else {
     console.log(`Room not found! for ${toRoom}`);
   }
   return null;
