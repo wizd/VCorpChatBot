@@ -120,7 +120,17 @@ const sendMessage = async (
     //   return await sendMessageToContact(bot, toContact, payload);
     // }
     // else {
-    const toContact = await bot.Contact.find({ id: toUserId }) ?? await bot.Contact.find({ alias: toUserId }) ?? await bot.Contact.find({ name: toUserId });
+    //const toContact1 = await bot.Contact.find({ id: toUserId });
+    const toContact2 = await bot.Contact.find({ alias: toUserId });
+    const toContact3 = await bot.Contact.find({ name: toUserId });
+    const toContact4 = await bot.Contact.find({ id: toUserId });
+
+    //console.log("toContact1: ", toContact1);
+    // console.log("toContact2: ", toContact2);
+    // console.log("toContact3: ", toContact3);
+    // console.log("toContact4: ", toContact4);
+
+    const toContact = toContact2 ?? toContact3 ?? toContact4;
     if (toContact === undefined) {
       console.log('contact not found: ', toUserId);
       return null;
