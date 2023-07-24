@@ -120,7 +120,7 @@ const sendMessage = async (
     //   return await sendMessageToContact(bot, toContact, payload);
     // }
     // else {
-    const toContact = await bot.Contact.find({ alias: toUserId }) ?? await bot.Contact.find({ name: toUserId });
+    const toContact = await bot.Contact.find({ id: toUserId }) ?? await bot.Contact.find({ alias: toUserId }) ?? await bot.Contact.find({ name: toUserId });
     if (toContact === undefined) {
       console.log('contact not found: ', toUserId);
       return null;
