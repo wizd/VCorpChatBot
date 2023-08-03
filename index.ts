@@ -7,6 +7,16 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+process.on('uncaughtException', (err) => {
+  console.error('An uncaught exception occurred!');
+  console.error(err.stack);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('An unhandled promise rejection occurred!');
+  console.error(err);
+});
+
 interface CommandLineArgs {
   NAME: string;
   MODE?: string;
