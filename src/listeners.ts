@@ -100,6 +100,26 @@ async function onFriendship(
   }
 }
 
+const findContact = async (
+  bot: WechatyInterface,
+  toUserId: string,
+  methods: ('id' | 'name' | 'alias')[]
+): Promise<Contact | undefined> => {
+  for (const method of methods) {
+    try {
+      const contact = await bot.Contact.find({ [method]: toUserId });
+      if (contact !== undefined) {
+        return contact;
+      }
+    } catch (err) {
+      console.error(`Failed to find contact by ${method}: `, err);
+    }
+  }
+
+  console.log('Contact not found: ', toUserId);
+  return undefined;
+};
+
 /**
  * toUserId: wxid_xxx | xxx@chatroom
  * payload: string | number | Message | Contact | FileBox | MiniProgram | UrlLink
@@ -109,52 +129,20 @@ const sendMessage = async (
   toUserId: string,
   payload: any
 ): Promise<Message | null> => {
+  if (typeof toUserId !== 'string') {
+    throw new Error('Invalid toUserId: must be a string');
+  }
+
   const secs = toUserId.split('/');
   if (secs.length === 1) {
-    // if (process.env.MODE === "powerbot") {
-    //   const toContact = await bot.Contact.find({ id: toUserId });
-    //   if (toContact === undefined) {
-    //     console.log('contact not found: ', toUserId);
-    //     return null;
-    //   }
-    //   return await sendMessageToContact(bot, toContact, payload);
-    // }
-    // else {
-    //const toContact1 = await bot.Contact.find({ id: toUserId });
-    let toContact;
-    try
-    {
-      toContact = await bot.Contact.find({ id: toUserId });
-    }
-    catch(err){
-      
-    }
-
-    try
-    {
-      toContact = await bot.Contact.find({ name: toUserId });
-    }
-    catch(err){
-      
-    }
-
-    try
-    {
-      toContact = await bot.Contact.find({ alias: toUserId });
-    }
-    catch(err){
-
-    }
-    
+    const toContact = await findContact(bot, toUserId, ['id', 'name', 'alias']);
     if (toContact === undefined) {
-      console.log('contact not found: ', toUserId);
       return null;
     }
+
     return await sendMessageToContact(bot, toContact, payload);
-    //}
-  }
-  else {
-    // send to room with @
+  } else {
+    // Send to room with @
     await sendMessageToRoom(bot, secs[0], secs[1], payload);
     return null;
   }
