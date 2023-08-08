@@ -17,12 +17,12 @@ VCORP_AI_URL="${5:-https://mars.vcorp.ai/vc/v1}"
 
 echo "using server url: $VCORP_AI_URL"
 
-
+VEID="${6}"
 # customize the name of memory-card
 WECHATY_NAME=$NAME
 
 while true; do
-  node dist/index --MODE "$MODE" --VCORP_AI_URL "$VCORP_AI_URL" --NAME "$NAME" --VCORP_AI_KEY "$VCORP_AI_KEY" --PAD_LOCAL_KEY "$PAD_LOCAL_KEY"
+  node dist/index --MODE "$MODE" --VCORP_AI_URL "$VCORP_AI_URL" --NAME "$NAME" --VCORP_AI_KEY "$VCORP_AI_KEY" --PAD_LOCAL_KEY "$PAD_LOCAL_KEY" --VEID "$VEID"
   exit_code=$?
   if [ $exit_code -ne 0 ]; then
     echo "Process exited with code $exit_code. Waiting for 30 seconds before restarting..."

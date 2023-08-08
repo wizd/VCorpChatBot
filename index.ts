@@ -23,6 +23,7 @@ interface CommandLineArgs {
   PAD_LOCAL_KEY?: string;
   VCORP_AI_KEY?: string;
   VCORP_AI_URL?: string;
+  VEID?: string;
 }
 
 // 解析命令行参数
@@ -34,6 +35,9 @@ export const MODE = argv.MODE || process.env.MODE;
 const PAD_LOCAL_KEY = argv.PAD_LOCAL_KEY || process.env.PAD_LOCAL_KEY;
 export const VCORP_AI_KEY = argv.VCORP_AI_KEY || process.env.VCORP_AI_KEY;
 export const VCORP_AI_URL = argv.VCORP_AI_URL || process.env.VCORP_AI_URL;
+export const VEID = argv.VEID || process.env.VEID;
+
+console.log("Command line is: ", argv);
 
 setWindowTitle(NAME!);
 

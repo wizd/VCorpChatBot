@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
+import { VEID } from '../index.js';
 
 axios.defaults.timeout = 180000;
 
@@ -35,7 +36,6 @@ export const fetchApi = async (
 
   // If VEID is defined and not empty, add it to data
   let postData = body;
-  const { VEID } = process.env;
   if (VEID !== undefined && VEID !== '') {
     postData = {
       ...body,
