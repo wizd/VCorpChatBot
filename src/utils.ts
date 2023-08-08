@@ -32,11 +32,22 @@ export const fetchApi = async (
     'User-Agent':
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
   };
+
+  // If VEID is defined and not empty, add it to data
+  let postData = body;
+  const { VEID } = process.env;
+  if (VEID !== undefined && VEID !== '') {
+    postData = {
+      ...body,
+      veid: VEID
+    }
+  }
+
   return axios(apiUrl, {
     method,
     headers,
     params,
-    data: body,
+    data: postData,
   }).then((res: AxiosResponse) => res.data);
 };
 
