@@ -40,6 +40,9 @@ export const msgRootDispatcher = async (
     }
     // 图片消息
     case PUPPET.types.Message.Image: {
+      // check img from self
+
+
       const file = await message.toFileBox();
       const blob: Buffer = await file.toBuffer();
 
@@ -233,6 +236,7 @@ export const msgRootDispatcher2 = async (
   contact: ContactInterface,
   room: RoomInterface | undefined
 ) => {
+  if (message.self()) return;
   // process special messages
   // transfer message, type === 11
   const input = message.text();
@@ -381,9 +385,16 @@ export const msgRootDispatcher2 = async (
       alias,
       text);
 
-    await processReply(reply, async (output) => {
-      await message.say(output);
-    });
+      try
+      {
+        await processReply(reply, async (output) => {
+          await message.say(output);
+        });
+      }
+      catch(err)
+      {
+        console.log("in await processReply: ", err);
+      }
   }
 };
 
@@ -392,20 +403,20 @@ async function processReply(
   sendMessage: (message: string | FileBox) => Promise<void>
 ) {
   console.log('AI reply is: ', reply);
-  const result = extractImageUrl(reply);
+  const result = extractImageUrls(reply);
 
   if (result.text.trim() !== '') {
     await sendMessage(result.text);
   }
 
-  if (result.imageUrl) {
+  for (const imageUrl of result.imageUrls) {
     // Download the image from the URL
-    const buffer = await downloadWithRetry(result.imageUrl.trim());
+    const buffer = await downloadWithRetry(imageUrl.trim());
 
     // 图片大小建议不要超过 2 M
     const fileBox = FileBox.fromBuffer(
       buffer!,
-      extractFilenameFromImageUrl(result.imageUrl)
+      extractFilenameFromImageUrl(imageUrl)
     );
     console.log('sending image to weixin...');
     await sendMessage(fileBox);
@@ -420,18 +431,13 @@ function extractFilenameFromImageUrl(url: string): string {
 
 interface UrlExtractionResult {
   text: string;
-  imageUrl?: string;
+  imageUrls: string[];
 }
 
-function extractImageUrl(text: string): UrlExtractionResult {
-  const urlRegex = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif))/i;
-  const match = text.match(urlRegex);
+function extractImageUrls(text: string): UrlExtractionResult {
+  const urlRegex = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif))/gi;
+  const matches = text.match(urlRegex);
 
-  if (match) {
-    const imageUrl = match[0];
-    const textWithoutUrl = text.replace(urlRegex, '').trim();
-    return { text: textWithoutUrl, imageUrl };
-  }
-
-  return { text };
+  const imageUrls = matches ? [...matches] : [];
+  return { text, imageUrls };
 }

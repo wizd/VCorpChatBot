@@ -10,21 +10,27 @@ export async function downloadWithRetry(url: string, retries = 3) {
                 throw new Error(`Failed to download after ${retries} attempts.`);
             }
             console.log(`Download attempt ${i} failed, retrying...`);
+            await new Promise(resolve => setTimeout(resolve, 1000 * i));  // Add delay
         }
     }
 }
 
-const customAxiosInstance = axios.create({
-    timeout: 90000,
-});
-
 async function downloadImage(url: string): Promise<Buffer> {
     try {
-        // for speed, replace default url to customized url
-        const fastUrl = url;//.replace("https://mars.vcorp.ai", process.env.VCORP_AI_URL!.replace("/vc/v1", ""));
-
+        const fastUrl = url;
         console.log('downloading image: ', fastUrl);
 
+        const parsedUrl = new URL(fastUrl);
+        const referer = `${parsedUrl.protocol}//${parsedUrl.host}`;
+
+        const customAxiosInstance = axios.create({
+            timeout: 90000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+                'Referer': referer
+            }
+        });
+        
         const response = await customAxiosInstance.get(fastUrl, {
             responseType: 'arraybuffer',
         });
