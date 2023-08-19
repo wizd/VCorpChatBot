@@ -218,11 +218,14 @@ function toArrayBuffer(buffer: Buffer) {
 
 async function getTalkerId(message: MessageInterface) {
   const talker = message.talker();
-  let alias = await talker.alias();
+  let alias = talker.id;
   if (!alias || alias.trim() === '') {
-    alias = await talker.name();
+    alias = await talker.alias() || '';
     if (!alias || alias.trim() === '') {
-      alias = talker.id;
+      alias = await talker.name();
+      if (!alias || alias.trim() === '') {
+        alias = talker.id;
+      }
     }
   }
   return alias;
