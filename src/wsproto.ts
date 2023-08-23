@@ -16,6 +16,7 @@ export interface VwsBaseMessage {
   dst: string;
   type: VwsMessageType; // 消息类型
   time: number; // 时间戳
+  veid?: string;  // 补充消息的 veid（可选）
 }
 
 export interface VwsTextMessage extends VwsBaseMessage {

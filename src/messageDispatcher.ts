@@ -12,7 +12,7 @@ import ChatClient from './chatClient.js';
 import { VwsBlobMessage, VwsImageMessage, VwsSystemMessage } from './wsproto.js';
 import { MiniProgram, UrlLink } from 'wechaty';
 import { VwsAudioMessage } from './wsproto.js';
-import { MODE } from '../index.js';
+import { MODE, VEID } from '../index.js';
 import { uploadFile } from './fileUploader.js';
 import { downloadWithRetry } from './wsmsgprocessor.js';
 import * as fs from 'fs';
@@ -147,6 +147,7 @@ export const msgRootDispatcher = async (
         fmt: audioFileBox.name.endsWith("mp3") ? "mp3" : undefined,
         time: new Date().getTime(),
         data: toArrayBuffer(audioData),
+        veid: VEID
       };
       cc.sendChatMessage(audiomsg);
       break;
