@@ -37,7 +37,7 @@ export const VCORP_AI_KEY = argv.VCORP_AI_KEY || process.env.VCORP_AI_KEY;
 export const VCORP_AI_URL = argv.VCORP_AI_URL || process.env.VCORP_AI_URL;
 export const VEID = argv.VEID || process.env.VEID;
 
-console.log("Command line is: ", argv);
+console.log("Command line is: ", argv, "VEID:", VEID);
 
 setWindowTitle(NAME!);
 
