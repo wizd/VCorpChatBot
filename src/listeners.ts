@@ -6,7 +6,7 @@ import {
   WechatyInterface,
 } from 'wechaty/impls';
 import pm2 from 'pm2';
-import { msgRootDispatcher } from './messageDispatcher.js';
+import { msgRootDispatcher, processReply } from './messageDispatcher.js';
 import { Contact, Message } from 'wechaty';
 import ChatClient from './chatClient.js';
 import {
@@ -186,9 +186,13 @@ function ConnectWebsocket() {
       if (isVwsTextMessage(vmsg)) {
         const tmsg = vmsg as VwsTextMessage;
         console.log('Send to', tmsg.dst, 'content: ', tmsg);
-
+ 
         // get user's id from user's name
         await sendMessage(thebot, vmsg.dst, tmsg.content);
+        await processReply(tmsg.content, async (output) => {
+          await sendMessage(thebot, vmsg.dst, output);
+        });
+        
       } else if (isVwsAudioMessage(vmsg)) {
         const audmsg = vmsg as VwsAudioMessage;
         console.log('duration is: ', audmsg.duration);

@@ -402,7 +402,7 @@ export const msgRootDispatcher2 = async (
   }
 };
 
-async function processReply(
+export async function processReply(
   reply: string,
   sendMessage: (message: string | FileBox) => Promise<void>
 ) {
