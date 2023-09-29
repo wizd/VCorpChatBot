@@ -188,7 +188,7 @@ function ConnectWebsocket() {
         console.log('Send to', tmsg.dst, 'content: ', tmsg);
  
         // get user's id from user's name
-        await sendMessage(thebot, vmsg.dst, tmsg.content);
+        //await sendMessage(thebot, vmsg.dst, tmsg.content);
         await processReply(tmsg.content, async (output) => {
           await sendMessage(thebot, vmsg.dst, output);
         });
