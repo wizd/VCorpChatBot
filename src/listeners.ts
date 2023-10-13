@@ -205,7 +205,9 @@ function ConnectWebsocket() {
           };
         }
 
-        const message = await sendMessage(thebot, audmsg.dst, fileBox);
+        if(audmsg.dst.indexOf('/') < 0){  // no speech to rooms
+          const message = await sendMessage(thebot, audmsg.dst, fileBox);
+        }        
       } else if (isVwsVideoMessage(vmsg)) {
         const vidmsg = vmsg as VwsVideoMessage;
         processVideoMessage(vidmsg);
